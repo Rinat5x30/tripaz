@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Book {{ guide.user.get_full_name }} — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{% url 'guides:catalog' %}">Guides</a> › <a href="{% url 'guides:profile' guide.pk %}">{{ guide.user.get_full_name }}</a> › Book
+    </div>
+    <h1>Book Your Experience</h1>
+  </div>
+</div>
+
+<div class="container section-sm">
+  <div class="booking-progress reveal">
+    <div class="booking-step active"><div class="booking-step-dot">1</div><div class="booking-step-label">Details</div></div>
+    <div class="booking-step"><div class="booking-step-dot">2</div><div class="booking-step-label">Payment</div></div>
+    <div class="booking-step"><div class="booking-step-dot">3</div><div class="booking-step-label">Confirm</div></div>
+  </div>
+
+  <div class="booking-wizard">
+    <!-- Booking Form -->
+    <div>
+      <div class="card">
+        <div class="card-body">
+          <h3 style="margin-bottom:20px;">📅 Booking Details</h3>
+          <form method="post" id="booking-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+              <label class="form-label">Tour Program <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+              {% render_field form.tour class="form-control" %}
+              <div class="form-hint">Leave blank for flexible hourly booking</div>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Date *</label>
+                {% render_field form.booking_date class="form-control" %}
+                <div class="date-availability-msg form-hint"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Time *</label>
+                {% render_field form.booking_time class="form-control" %}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Number of People *</label>
+              {% render_field form.people_count class="form-control" min="1" max="20" %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Special Requests</label>
+              {% render_field form.special_requests class="form-control" %}
+            </div>
+
+            {% for error in form.non_field_errors %}
+            <div class="alert alert-danger" style="position:static;margin-bottom:12px;">{{ error }}</div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Continue to Payment →</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Summary -->
+    <div class="booking-summary">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        {% if guide.user.avatar %}
+          <img src="{{ guide.user.avatar.url }}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;">
+        {% else %}
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-size:1.3rem;font-weight:700;">
+            {{ guide.user.first_name|first }}
+          </div>
+        {% endif %}
+        <div>
+          <div style="font-weight:700;">{{ guide.user.get_full_name }}</div>
+          <div style="font-size:.82rem;color:var(--text-muted);">📍 {{ guide.get_city_display }}</div>
+          {% if guide.total_reviews > 0 %}
+          <div style="font-size:.82rem;color:#f59e0b;">⭐ {{ guide.rating }} ({{ guide.total_reviews }} reviews)</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="price-breakdown">
+        <div class="price-row">
+          <span>Price per person</span>
+          <span id="summary-rate">— AZN</span>
+        </div>
+        <div class="price-row">
+          <span>People</span>
+          <span id="summary-people">1</span>
+        </div>
+        <div class="price-row total">
+          <span>Estimated total</span>
+          <span id="summary-total">— AZN</span>
+        </div>
+      </div>
+
+      <div style="font-size:.82rem;color:var(--text-muted);display:flex;flex-direction:column;gap:8px;">
+        <div>✓ Free cancellation up to 24h before</div>
+        <div>✓ Payment processed securely</div>
+        <div>✓ Guide confirms within 24 hours</div>
+        <div>✓ No hidden fees</div>
+      </div>
+
+      {% if guide.availability %}
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+        <div style="font-size:.85rem;font-weight:600;margin-bottom:8px;">Guide Languages:</div>
+        <div class="lang-tags">
+          {% for lang in guide.get_languages_list %}
+          <span class="lang-tag">{{ lang }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+const peopleInput = document.querySelector('input[name="people_count"]');
+const tourSelect = document.querySelector('select[name="tour"]');
+
+const tourPrices = {};
+{% for tour in guide.tours.all %}
+tourPrices[{{ tour.pk }}] = {{ tour.price_per_person }};
+{% endfor %}
+
+function updateSummary() {
+  const people = parseInt(peopleInput?.value) || 1;
+  const selectedTour = tourSelect?.value;
+  const rate = (selectedTour && tourPrices[selectedTour]) ? tourPrices[selectedTour] : null;
+
+  if (rate !== null) {
+    const total = rate * people;
+    document.getElementById('summary-rate').textContent = rate.toFixed(2) + ' AZN';
+    document.getElementById('summary-people').textContent = people;
+    document.getElementById('summary-total').textContent = total.toFixed(2) + ' AZN';
+  } else {
+    document.getElementById('summary-rate').textContent = '— AZN';
+    document.getElementById('summary-people').textContent = people;
+    document.getElementById('summary-total').textContent = '— AZN';
+  }
+}
+
+peopleInput?.addEventListener('input', updateSummary);
+tourSelect?.addEventListener('change', updateSummary);
+
+// Date availability hint
+const availDates = {{ availability_dates|safe }};
+const dateInput = document.querySelector('input[name="booking_date"]');
+dateInput?.addEventListener('input', () => {
+  const msg = document.querySelector('.date-availability-msg');
+  if (!msg) return;
+  if (availDates.includes(dateInput.value)) {
+    msg.textContent = '✓ Guide is available on this date';
+    msg.style.color = 'var(--success)';
+  } else if (dateInput.value) {
+    msg.textContent = '⚠ Guide may not be available — request will need confirmation';
+    msg.style.color = 'var(--warning)';
+  } else {
+    msg.textContent = '';
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Payment — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="{% url 'accounts:dashboard' %}">Dashboard</a> › Payment</div>
+    <h1>Secure Payment</h1>
+  </div>
+</div>
+
+<div class="container section-sm" style="max-width:900px;">
+  <div class="grid-2" style="align-items:start;">
+
+    <!-- Payment Form -->
+    <div>
+      <div class="mock-badge">🧪 This is a mock payment — no real charges</div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;font-size:.88rem;">
+        <strong>💳 50% Prepayment Policy</strong><br>
+        You pay <strong>{{ prepay_amount }} AZN</strong> now (50% deposit). The remaining <strong>{{ prepay_amount }} AZN</strong> is paid directly to the guide after the tour.
+      </div>
+
+      <div class="card payment-card" style="max-width:100%;">
+        <div class="card-body">
+          <!-- Card Preview -->
+          <div class="card-preview">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <span style="font-weight:700;font-size:.9rem;">TripAZ Secure Pay</span>
+              <span style="font-size:1.1rem;" id="card-type-icon">💳</span>
+            </div>
+            <div class="card-number" style="font-size:1.3rem;letter-spacing:.15em;font-family:monospace;">4242 4242 4242 4242</div>
+            <div class="card-meta">
+              <div>
+                <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;opacity:.7;">Cardholder</div>
+                <div class="card-holder-name" style="font-weight:600;">CARDHOLDER NAME</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;opacity:.7;">Expires</div>
+                <div style="font-weight:600;" id="card-expiry-display">MM/YY</div>
+              </div>
+            </div>
+          </div>
+
+          <h3 style="margin-bottom:16px;">Card Details</h3>
+          <form method="post" id="payment-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+              <label class="form-label">Card Type</label>
+              <div style="display:flex;gap:12px;">
+                {% for choice in form.card_type.field.choices %}
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:.88rem;transition:var(--transition);" onclick="this.style.borderColor='var(--primary)'">
+                  <input type="radio" name="card_type" value="{{ choice.0 }}" {% if forloop.first %}checked{% endif %} style="accent-color:var(--primary);">
+                  {{ choice.1 }}
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Card Number</label>
+              {% render_field form.card_number class="form-control" style="font-family:monospace;font-size:1.05rem;letter-spacing:.1em;" %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Cardholder Name</label>
+              {% render_field form.cardholder_name class="form-control" %}
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Expiry Date</label>
+                {% render_field form.expiry class="form-control" %}
+              </div>
+              <div class="form-group">
+                <label class="form-label">CVV</label>
+                {% render_field form.cvv class="form-control" %}
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;" id="pay-btn">
+              🔒 Pay {{ prepay_amount }} AZN (50% deposit)
+            </button>
+            <p style="text-align:center;font-size:.78rem;color:var(--text-muted);margin-top:8px;">🧪 Mock payment — click any card details</p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div>
+      <div class="card">
+        <div class="card-body">
+          <h3 style="margin-bottom:16px;">Order Summary</h3>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+            <div style="width:48px;height:48px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">
+              {{ booking.guide.user.first_name|first }}
+            </div>
+            <div>
+              <div style="font-weight:700;">{{ booking.guide.user.get_full_name }}</div>
+              <div style="font-size:.82rem;color:var(--text-muted);">📍 {{ booking.guide.get_city_display }}</div>
+            </div>
+          </div>
+
+          <div class="price-breakdown">
+            <div class="price-row">
+              <span>Date</span>
+              <span>{{ booking.booking_date }}</span>
+            </div>
+            <div class="price-row">
+              <span>Time</span>
+              <span>{{ booking.booking_time }}</span>
+            </div>
+            <div class="price-row">
+              <span>People</span>
+              <span>{{ booking.people_count }}</span>
+            </div>
+            {% if booking.tour %}
+            <div class="price-row">
+              <span>Tour</span>
+              <span style="max-width:150px;text-align:right;font-size:.85rem;">{{ booking.tour.title }}</span>
+            </div>
+            {% endif %}
+            <div class="price-row">
+              <span>Platform fee</span>
+              <span>Included</span>
+            </div>
+            <div class="price-row">
+              <span>Full price</span>
+              <span>{{ booking.total_price }} AZN</span>
+            </div>
+            <div class="price-row total">
+              <span>Pay now (50%)</span>
+              <span style="color:var(--primary);">{{ prepay_amount }} AZN</span>
+            </div>
+            <div class="price-row" style="font-size:.82rem;color:var(--text-muted);">
+              <span>After tour (50%)</span>
+              <span>{{ prepay_amount }} AZN</span>
+            </div>
+          </div>
+
+          <div style="font-size:.82rem;color:var(--text-muted);">
+            <div style="font-weight:600;margin-bottom:6px;">Booking Ref: <span style="font-family:monospace;">{{ booking.booking_ref }}</span></div>
+            <div>✓ Payment is secure and encrypted</div>
+            <div>✓ You'll receive a confirmation email</div>
+            <div>✓ Free cancellation up to 24h before</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Live card preview updates
+document.querySelector('input[name="cardholder_name"]')?.addEventListener('input', function() {
+  document.querySelector('.card-holder-name').textContent = this.value.toUpperCase() || 'CARDHOLDER NAME';
+});
+document.querySelector('input[name="expiry"]')?.addEventListener('input', function() {
+  document.querySelector('#card-expiry-display').textContent = this.value || 'MM/YY';
+});
+document.querySelector('input[name="card_number"]')?.addEventListener('input', function() {
+  let v = this.value.replace(/\D/g,'').slice(0,16);
+  this.value = v.replace(/(.{4})/g,'$1 ').trim();
+  const padded = v.padEnd(16,'•');
+  document.querySelector('.card-number').textContent = padded.replace(/(.{4})/g,'$1 ').trim();
+});
+
+// Pay button loading
+document.getElementById('payment-form')?.addEventListener('submit', function() {
+  const btn = document.getElementById('pay-btn');
+  btn.innerHTML = '<span class="loading-spinner" style="border-color:rgba(255,255,255,.3);border-top-color:white;display:inline-block;"></span> Processing...';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Contacts — TripAZ{% endblock %}
+{% block meta_desc %}Get in touch with TripAZ — we're happy to help with any question about booking guides in Azerbaijan.{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<section style="background:linear-gradient(135deg,var(--primary),#264e7c);padding:72px 0;color:white;text-align:center;">
+  <div class="container">
+    <div style="font-size:3rem;margin-bottom:16px;">📞</div>
+    <h1 style="color:white;margin-bottom:10px;">Get in Touch</h1>
+    <p style="color:rgba(255,255,255,.75);font-size:1.05rem;max-width:480px;margin:0 auto;">
+      Questions about a booking, partnership inquiries, or anything else — we'd love to hear from you.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container" style="max-width:940px;">
+    <div class="grid-2" style="gap:48px;align-items:start;">
+
+      <!-- Contact Form -->
+      <div>
+        <h2 style="margin-bottom:6px;">Send us a message</h2>
+        <p style="margin-bottom:28px;">We typically reply within 24 hours on business days.</p>
+
+        <form method="post" class="card" style="padding:28px;">
+          {% csrf_token %}
+
+          <div class="form-group">
+            <label class="form-label">Your Name *</label>
+            <input type="text" name="name" class="form-control"
+                   placeholder="John Smith" required
+                   value="{{ request.POST.name|default:'' }}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" name="email" class="form-control"
+                   placeholder="john@example.com" required
+                   value="{{ request.POST.email|default:'' }}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Subject</label>
+            <select name="subject" class="form-control">
+              <option value="general">General Question</option>
+              <option value="booking">Booking Help</option>
+              <option value="guide">Guide Application</option>
+              <option value="partnership">Partnership / Media</option>
+              <option value="complaint">Complaint</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Message *</label>
+            <textarea name="message" class="form-control" rows="5"
+                      placeholder="Tell us how we can help…" required>{{ request.POST.message|default:'' }}</textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">
+            Send Message
+          </button>
+        </form>
+      </div>
+
+      <!-- Contact Info -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <div>
+          <h2 style="margin-bottom:20px;">Contact Details</h2>
+        </div>
+
+        <div class="card" style="padding:20px;display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:44px;height:44px;border-radius:var(--radius-sm);background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">📧</div>
+          <div>
+            <div style="font-weight:700;margin-bottom:2px;">Email</div>
+            <a href="mailto:hello@tripaz.az" style="color:var(--primary);">hello@tripaz.az</a>
+            <div style="font-size:.82rem;color:var(--text-muted);margin-top:2px;">For general inquiries</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:20px;display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:44px;height:44px;border-radius:var(--radius-sm);background:#dcfce7;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">📱</div>
+          <div>
+            <div style="font-weight:700;margin-bottom:2px;">WhatsApp / Phone</div>
+            <a href="tel:+994501234567" style="color:var(--primary);">+994 50 123 45 67</a>
+            <div style="font-size:.82rem;color:var(--text-muted);margin-top:2px;">Mon–Fri, 09:00 – 18:00 Baku time</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:20px;display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:44px;height:44px;border-radius:var(--radius-sm);background:#ffedd5;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">📍</div>
+          <div>
+            <div style="font-weight:700;margin-bottom:2px;">Office</div>
+            <div>AZ1010, Baku, Azerbaijan</div>
+            <div style="font-size:.82rem;color:var(--text-muted);margin-top:2px;">Nizami Street 12, 3rd floor</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:20px;display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:44px;height:44px;border-radius:var(--radius-sm);background:#f3e8ff;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">🕐</div>
+          <div>
+            <div style="font-weight:700;margin-bottom:2px;">Working Hours</div>
+            <div>Monday – Friday: 09:00 – 18:00</div>
+            <div>Saturday: 10:00 – 14:00</div>
+            <div style="font-size:.82rem;color:var(--text-muted);margin-top:2px;">Baku time (UTC+4)</div>
+          </div>
+        </div>
+
+        <!-- Social -->
+        <div class="card" style="padding:20px;">
+          <div style="font-weight:700;margin-bottom:14px;">Follow TripAZ</div>
+          <div style="display:flex;gap:10px;">
+            <a href="#" class="social-link" style="background:var(--bg);color:var(--text);">f</a>
+            <a href="#" class="social-link" style="background:var(--bg);color:var(--text);">𝕏</a>
+            <a href="#" class="social-link" style="background:var(--bg);color:var(--text);">in</a>
+            <a href="#" class="social-link" style="background:var(--bg);color:var(--text);">▶</a>
+          </div>
+        </div>
+
+        <!-- Guide application shortcut -->
+        <div style="background:linear-gradient(135deg,var(--teal),#1a6b60);border-radius:var(--radius);padding:20px;color:white;">
+          <div style="font-weight:700;margin-bottom:6px;">Are you a local guide?</div>
+          <p style="color:rgba(255,255,255,.8);font-size:.88rem;margin-bottom:14px;">Apply to join TripAZ and start earning.</p>
+          <a href="{% url 'guides:register' %}" class="btn btn-primary btn-sm">Apply Now →</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

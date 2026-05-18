@@ -1,0 +1,48 @@
+<a href="{% url 'guides:profile' guide.pk %}" class="gc reveal">
+
+  <!-- Avatar header -->
+  <div class="gc-head">
+    <div class="gc-avatar">
+      {% if guide.user.avatar %}
+        <img src="{{ guide.user.avatar.url }}" alt="{{ guide.user.get_full_name }}">
+      {% else %}
+        {{ guide.user.first_name|first|upper }}{{ guide.user.last_name|first|upper }}
+      {% endif %}
+    </div>
+    {% if guide.is_featured %}
+      <span class="gc-badge gc-badge--featured">★ Featured</span>
+    {% endif %}
+    {% if user.is_authenticated and user.role == 'tourist' %}
+      <button class="fav-btn" data-guide-id="{{ guide.pk }}" type="button" aria-label="Save guide">🤍</button>
+    {% endif %}
+  </div>
+
+  <!-- Info -->
+  <div class="gc-body">
+    <div class="gc-top">
+      <div>
+        <div class="gc-name">{{ guide.user.get_full_name }}</div>
+        <div class="gc-city">{{ guide.get_city_display }}, Azerbaijan</div>
+      </div>
+      {% if guide.total_reviews > 0 %}
+        <div class="gc-rating">★ {{ guide.rating }}</div>
+      {% endif %}
+    </div>
+
+    <p class="gc-tagline">{{ guide.tagline|default:guide.bio|truncatewords:12 }}</p>
+
+    <div class="gc-langs">
+      {% for lang in guide.get_languages_list %}
+        <span class="gc-lang">{{ lang|title }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="gc-footer">
+      <span class="gc-tours">{{ guide.tours.count }} tour{{ guide.tours.count|pluralize }}</span>
+      {% if guide.has_certificate %}
+        <span class="gc-verified">✓ Verified</span>
+      {% endif %}
+    </div>
+  </div>
+
+</a>

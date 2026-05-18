@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Support Tickets — TripAZ Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container"><h1>🎫 Support Tickets</h1></div>
+</div>
+<div class="container section-sm">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>#</th><th>User</th><th>Category</th><th>Subject</th><th>Status</th><th>Created</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for ticket in tickets %}
+        <tr>
+          <td>{{ ticket.pk }}</td>
+          <td>{{ ticket.user.username }}</td>
+          <td><span class="tag tag-blue">{{ ticket.get_category_display }}</span></td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ ticket.subject }}</td>
+          <td><span class="status status-{{ ticket.status|cut:'_' }}">{{ ticket.get_status_display }}</span></td>
+          <td>{{ ticket.created_at|date:"M d" }}</td>
+          <td>
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="ticket_id" value="{{ ticket.pk }}">
+              <select name="status" style="padding:4px 8px;font-size:.82rem;border:1px solid var(--border);border-radius:var(--radius-sm);">
+                <option value="open">Open</option>
+                <option value="in_progress" {% if ticket.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                <option value="resolved" {% if ticket.status == 'resolved' %}selected{% endif %}>Resolved</option>
+                <option value="closed" {% if ticket.status == 'closed' %}selected{% endif %}>Closed</option>
+              </select>
+              <button type="submit" class="btn btn-sm btn-primary" style="margin-left:6px;">Update</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:40px;">No tickets</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

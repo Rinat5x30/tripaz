@@ -1,0 +1,43 @@
+<a href="{% url 'guides:tour_detail' tour.pk %}" class="tc">
+  <div class="tc-img">
+    {% with tour.images.all as imgs %}
+    {% if imgs %}
+      <img src="{{ imgs.0.image.url }}" alt="{{ tour.title }}" loading="lazy">
+    {% else %}
+      <div class="tc-img-placeholder"></div>
+    {% endif %}
+    {% endwith %}
+    {% if tour.category %}
+      <span class="tc-cat">{{ tour.get_category_display }}</span>
+    {% endif %}
+  </div>
+
+  <div class="tc-body">
+    <div class="tc-top">
+      <h4 class="tc-title">{{ tour.title }}</h4>
+      <span class="tc-price">{{ tour.price_per_person }} <small>AZN</small></span>
+    </div>
+    <p class="tc-desc">{{ tour.description|truncatewords:18 }}</p>
+    <div class="tc-meta">
+      <span>{{ tour.duration_hours }}h</span>
+      <span>·</span>
+      <span>до {{ tour.max_people }} чел.</span>
+      {% if tour.location %}
+      <span>·</span>
+      <span>{{ tour.location }}</span>
+      {% endif %}
+    </div>
+    {% if show_guide %}
+    <div class="tc-guide">
+      <div class="tc-guide-avatar">
+        {% if tour.guide.user.avatar %}
+          <img src="{{ tour.guide.user.avatar.url }}" alt="">
+        {% else %}
+          {{ tour.guide.user.first_name|first }}
+        {% endif %}
+      </div>
+      <span>{{ tour.guide.user.get_full_name }}</span>
+    </div>
+    {% endif %}
+  </div>
+</a>

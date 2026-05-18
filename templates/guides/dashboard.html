@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+
+{% block title %}Guide Dashboard — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container flex-between" style="flex-wrap:wrap;gap:12px;">
+    <div>
+      <h1>Guide Dashboard</h1>
+      <p style="color:rgba(255,255,255,.7);">
+        {{ guide.user.get_full_name }}
+        {% if guide.verification_status == 'approved' %}
+          <span class="verified-badge" style="margin-left:8px;">✓ Approved</span>
+        {% elif guide.verification_status == 'pending' %}
+          <span class="pending-badge verified-badge" style="margin-left:8px;">⏳ Under Review</span>
+        {% else %}
+          <span class="rejected-badge verified-badge" style="margin-left:8px;">✗ Rejected</span>
+        {% endif %}
+      </p>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <a href="{% url 'guides:tour_create' %}" class="btn btn-primary">➕ Add Tour</a>
+      <a href="{% url 'guides:profile' guide.pk %}" class="btn btn-outline" style="border-color:rgba(255,255,255,.5);color:white;">View Profile</a>
+    </div>
+  </div>
+</div>
+
+{% if guide.verification_status == 'pending' %}
+<div style="background:#fef9c3;border-bottom:1px solid #fde68a;padding:14px 0;">
+  <div class="container" style="display:flex;align-items:center;gap:12px;">
+    <span style="font-size:1.3rem;">⏳</span>
+    <div>
+      <strong>Application Under Review</strong>
+      <p style="margin:0;font-size:.88rem;color:var(--text-muted);">Our team is reviewing your documents. You'll receive a notification within 24 hours.</p>
+    </div>
+  </div>
+</div>
+{% elif guide.verification_status == 'rejected' %}
+<div style="background:#fee2e2;border-bottom:1px solid #fca5a5;padding:14px 0;">
+  <div class="container">
+    <strong style="color:#991b1b;">Application Rejected</strong>
+    {% if guide.rejection_reason %}
+    <p style="margin:4px 0 0;font-size:.88rem;color:#7f1d1d;">Reason: {{ guide.rejection_reason }}</p>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<div class="container section-sm">
+  <div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div style="text-align:center;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px;">
+        {% if guide.user.avatar %}
+          <img src="{{ guide.user.avatar.url }}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;margin-bottom:8px;">
+        {% else %}
+          <div style="width:64px;height:64px;border-radius:50%;background:var(--primary);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.5rem;font-weight:700;">
+            {{ guide.user.first_name|first }}{{ guide.user.last_name|first }}
+          </div>
+        {% endif %}
+        <div style="font-weight:700;">{{ guide.user.get_full_name }}</div>
+        <div style="font-size:.8rem;color:var(--text-muted);">📍 {{ guide.get_city_display }}</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="{% url 'guides:dashboard' %}" class="active"><span class="icon">📊</span> Dashboard</a>
+        <a href="{% url 'guides:tour_create' %}"><span class="icon">➕</span> Add Tour</a>
+        <a href="{% url 'chat:inbox' %}"><span class="icon">💬</span> Messages</a>
+        <a href="{% url 'core:notifications' %}"><span class="icon">🔔</span> Notifications</a>
+        <a href="{% url 'guides:profile_edit' %}"><span class="icon">✏</span> Edit Profile</a>
+        <a href="{% url 'bookings:withdrawal' %}"><span class="icon">💸</span> Withdraw</a>
+        <a href="{% url 'accounts:logout' %}" style="color:var(--danger);margin-top:8px;"><span class="icon">↩</span> Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <div>
+      <!-- Stats -->
+      <div class="grid-4" style="margin-bottom:24px;">
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;">
+            <div>
+              <span class="stat-value">{{ stats.revenue|floatformat:0 }} AZN</span>
+              <div class="stat-label">Total Revenue</div>
+            </div>
+            <div class="stat-icon green">💰</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;">
+            <div>
+              <span class="stat-value">{{ stats.total_bookings }}</span>
+              <div class="stat-label">Total Bookings</div>
+            </div>
+            <div class="stat-icon blue">🗓</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;">
+            <div>
+              <span class="stat-value">{{ stats.rating }}</span>
+              <div class="stat-label">Average Rating</div>
+            </div>
+            <div class="stat-icon orange">⭐</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;">
+            <div>
+              <span class="stat-value">{{ stats.pending }}</span>
+              <div class="stat-label">Pending Requests</div>
+            </div>
+            <div class="stat-icon purple">⏳</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Booking Requests -->
+      {% with pending_bookings=bookings|dictsortreversed:"created_at" %}
+      {% if stats.pending > 0 %}
+      <div class="card" style="margin-bottom:20px;border:2px solid var(--warning);">
+        <div class="card-body">
+          <h3 style="margin-bottom:16px;color:var(--warning);">⏳ Pending Requests ({{ stats.pending }})</h3>
+          {% for booking in bookings %}
+          {% if booking.status == 'pending' %}
+          <div style="background:var(--bg);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+              <div>
+                <div style="font-weight:700;">{{ booking.tourist.get_full_name }}</div>
+                <div style="font-size:.85rem;color:var(--text-muted);">
+                  📅 {{ booking.booking_date }} at {{ booking.booking_time }} · {{ booking.people_count }} person{{ booking.people_count|pluralize }}
+                </div>
+                {% if booking.tour %}<div style="font-size:.85rem;margin-top:2px;">Tour: {{ booking.tour.title }}</div>{% endif %}
+                {% if booking.special_requests %}<div style="font-size:.83rem;color:var(--text-muted);margin-top:4px;">Note: {{ booking.special_requests }}</div>{% endif %}
+                <div style="font-weight:700;color:var(--primary);margin-top:4px;">{{ booking.total_price }} AZN</div>
+              </div>
+              <form method="post" action="{% url 'guides:handle_booking' booking.pk %}" style="display:flex;flex-direction:column;gap:8px;min-width:200px;">
+                {% csrf_token %}
+                <input type="text" name="message" placeholder="Message to tourist (optional)" class="form-control" style="font-size:.85rem;">
+                <div style="display:flex;gap:8px;">
+                  <button type="submit" name="action" value="accept" class="btn btn-success btn-sm" style="flex:1;">✓ Accept</button>
+                  <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm" style="flex:1;" onclick="return confirm('Reject this booking?')">✗ Reject</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <!-- All Bookings -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-body">
+          <h3 style="margin-bottom:16px;">Recent Bookings</h3>
+          {% if bookings %}
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Ref</th><th>Tourist</th><th>Date</th><th>Tour</th><th>Amount</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {% for booking in bookings %}
+                <tr>
+                  <td style="font-family:monospace;font-weight:700;">{{ booking.booking_ref }}</td>
+                  <td>
+                    <a href="{% url 'chat:start' booking.tourist.pk %}" style="color:var(--primary);font-weight:600;">{{ booking.tourist.get_full_name }}</a>
+                  </td>
+                  <td>{{ booking.booking_date }}</td>
+                  <td style="font-size:.85rem;">{{ booking.tour.title|default:"Hourly" }}</td>
+                  <td style="font-weight:600;">{{ booking.total_price }} AZN</td>
+                  <td><span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span></td>
+                  <td>
+                    {% if booking.status == 'confirmed' %}
+                      <a href="{% url 'bookings:complete' booking.pk %}" class="btn btn-sm btn-teal" onclick="return confirm('Mark as completed?')">✓ Complete</a>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="empty-state" style="padding:40px;">
+            <div class="icon">🗓</div>
+            <h3>No bookings yet</h3>
+            <p>Once your profile is live, bookings will appear here.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- My Tours -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-body">
+          <div class="flex-between" style="margin-bottom:16px;">
+            <h3>My Tours</h3>
+            <a href="{% url 'guides:tour_create' %}" class="btn btn-primary btn-sm">➕ Add Tour</a>
+          </div>
+          {% if tours %}
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            {% for tour in tours %}
+            <div style="display:flex;align-items:center;gap:16px;padding:12px;background:var(--bg);border-radius:var(--radius-sm);">
+              <div style="font-size:1.6rem;">🗺</div>
+              <div style="flex:1;">
+                <div style="font-weight:600;">{{ tour.title }}</div>
+                <div style="font-size:.82rem;color:var(--text-muted);">{{ tour.duration_hours }}h · {{ tour.price_per_person }} AZN/person</div>
+              </div>
+              <span class="status {% if tour.is_active %}status-confirmed{% else %}status-cancelled{% endif %}">
+                {% if tour.is_active %}Active{% else %}Inactive{% endif %}
+              </span>
+              <div style="display:flex;gap:6px;">
+                <a href="{% url 'guides:tour_edit' tour.pk %}" class="btn btn-sm btn-outline">✏ Edit</a>
+                <a href="{% url 'guides:tour_delete' tour.pk %}" class="btn btn-sm btn-outline" style="color:var(--danger);border-color:var(--danger);">🗑</a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty-state" style="padding:30px;">
+            <p>No tours yet. <a href="{% url 'guides:tour_create' %}" style="color:var(--primary);">Create your first tour →</a></p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Recent Reviews -->
+      {% if reviews %}
+      <div class="card">
+        <div class="card-body">
+          <h3 style="margin-bottom:16px;">Recent Reviews</h3>
+          {% for review in reviews %}
+          <div class="review-card" style="margin-bottom:12px;">
+            <div class="reviewer-info">
+              <div class="reviewer-avatar">{{ review.tourist.first_name|first }}</div>
+              <div>
+                <div style="font-weight:600;font-size:.9rem;">{{ review.tourist.get_full_name }}</div>
+                <div class="review-date">{{ review.created_at|date:"M d, Y" }}</div>
+              </div>
+              <div style="margin-left:auto;color:#f59e0b;">
+                {% for i in '12345' %}{% if forloop.counter <= review.rating %}⭐{% endif %}{% endfor %}
+              </div>
+            </div>
+            {% if review.title %}<div style="font-weight:600;margin-bottom:4px;">{{ review.title }}</div>{% endif %}
+            <p style="font-size:.88rem;">{{ review.body }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

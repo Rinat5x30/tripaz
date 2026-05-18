@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Messages — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container"><h1>💬 Messages</h1></div>
+</div>
+<div class="container section-sm" style="max-width:700px;">
+  <div class="card">
+    {% if conversations %}
+      {% for conv in conversations %}
+      <a href="{% url 'chat:conversation' conv.partner.pk %}" class="conv-item" style="text-decoration:none;color:inherit;">
+        <div class="conv-avatar" style="background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">
+          {{ conv.partner.first_name|first }}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div class="conv-name">{{ conv.partner.get_full_name }}</div>
+          {% if conv.last_message %}
+          <div class="conv-preview">{{ conv.last_message.content }}</div>
+          {% endif %}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          {% if conv.last_message %}
+          <span class="conv-time">{{ conv.last_message.created_at|timesince }} ago</span>
+          {% endif %}
+          {% if conv.unread > 0 %}
+          <span class="badge" style="background:var(--primary);color:white;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;">{{ conv.unread }}</span>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    {% else %}
+    <div class="empty-state">
+      <div class="icon">💬</div>
+      <h3>No conversations yet</h3>
+      <p>Book a guide to start a conversation.</p>
+      <a href="{% url 'guides:catalog' %}" class="btn btn-primary">Find Guides</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

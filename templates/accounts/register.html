@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Create Account — TripAZ{% endblock %}
+{% block body_class %}page-auth{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="navbar-brand" style="font-size:1.6rem;margin-bottom:40px;">🗺️ Trip<span style="color:var(--accent);">AZ</span></div>
+    <h2 style="color:white;font-size:1.6rem;margin-bottom:8px;">Join the TripAZ Community</h2>
+    <div class="auth-quote">"Azerbaijan awaits — let us be your first connection to an unforgettable journey."</div>
+    <div class="auth-features">
+      <div class="auth-feature"><div class="icon">🌍</div> Travelers from 40+ countries</div>
+      <div class="auth-feature"><div class="icon">🛡</div> Verified & licensed guides only</div>
+      <div class="auth-feature"><div class="icon">💳</div> Secure payments & refund policy</div>
+      <div class="auth-feature"><div class="icon">📱</div> Works on all devices</div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-box" style="max-width:440px;">
+      <h2>Create your account</h2>
+      <p>Start exploring Azerbaijan with local experts</p>
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            {% render_field form.first_name class="form-control" placeholder="John" %}
+            {% if form.first_name.errors %}<div class="invalid-feedback">{{ form.first_name.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            {% render_field form.last_name class="form-control" placeholder="Smith" %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          {% render_field form.email class="form-control" placeholder="john@example.com" %}
+          {% if form.email.errors %}<div class="invalid-feedback">{{ form.email.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          {% render_field form.username class="form-control" placeholder="Choose a username" %}
+          {% if form.username.errors %}<div class="invalid-feedback">{{ form.username.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Country</label>
+          {% render_field form.country class="form-control" placeholder="Your home country" %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          {% render_field form.password1 class="form-control" placeholder="Create a strong password" %}
+          {% if form.password1.errors %}<div class="invalid-feedback">{{ form.password1.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          {% render_field form.password2 class="form-control" placeholder="Repeat your password" %}
+          {% if form.password2.errors %}<div class="invalid-feedback">{{ form.password2.errors.0 }}</div>{% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-bottom:14px;">Create Account</button>
+      </form>
+
+      <div style="text-align:center;font-size:.9rem;">
+        Already have an account? <a href="{% url 'accounts:login' %}" style="color:var(--primary);font-weight:600;">Sign in</a>
+      </div>
+      {% if next == '/guides/register/' %}
+      <div style="margin-top:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;text-align:center;font-size:.83rem;color:#166534;">
+        After signing up you'll be taken to the guide application form.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container"><h1>🔔 Notifications</h1></div>
+</div>
+<div class="container section-sm" style="max-width:680px;">
+  <div class="card">
+    {% if notifications %}
+      {% for notif in notifications %}
+      <div class="notif-item {% if not notif.is_read %}unread{% endif %}">
+        <div class="notif-icon {{ notif.notification_type }}">
+          {% if notif.notification_type == 'booking' %}🗓
+          {% elif notif.notification_type == 'review' %}⭐
+          {% elif notif.notification_type == 'message' %}💬
+          {% elif notif.notification_type == 'verification' %}✓
+          {% else %}🔔{% endif %}
+        </div>
+        <div style="flex:1;">
+          <div class="notif-title">{{ notif.title }}</div>
+          <div class="notif-body">{{ notif.message }}</div>
+          <div class="notif-time">{{ notif.created_at|timesince }} ago</div>
+        </div>
+        {% if notif.link %}
+        <a href="{{ notif.link }}" class="btn btn-sm btn-outline">View →</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+    <div class="empty-state">
+      <div class="icon">🔔</div>
+      <h3>All caught up!</h3>
+      <p>No notifications yet. They'll appear here when you have bookings or messages.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ guide.user.get_full_name }} — Guide Profile · TripAZ{% endblock %}
+
+{% block content %}
+
+<!-- ═══ Guide Hero Header ═══ -->
+<div class="gp-hero">
+  <div class="gp-hero-bg"></div>
+  <div class="container">
+    <div class="gp-hero-inner">
+
+      <!-- Avatar -->
+      <div class="gp-avatar-wrap">
+        {% if guide.user.avatar %}
+          <img src="{{ guide.user.avatar.url }}" alt="{{ guide.user.get_full_name }}" class="gp-avatar">
+        {% else %}
+          <div class="gp-avatar gp-avatar--initials">
+            {{ guide.user.first_name|first|upper }}{{ guide.user.last_name|first|upper }}
+          </div>
+        {% endif %}
+        {% if guide.has_certificate %}
+          <div class="gp-verified-dot" title="Certified Guide">✓</div>
+        {% endif %}
+      </div>
+
+      <!-- Info -->
+      <div class="gp-header-info">
+        <div class="gp-name-row">
+          <h1>{{ guide.user.get_full_name }}</h1>
+          {% if guide.has_certificate %}
+            <span class="verified-badge">✓ Verified Guide</span>
+          {% endif %}
+          {% if guide.is_featured %}
+            <span class="tag tag-orange">★ Featured</span>
+          {% endif %}
+        </div>
+        <p class="gp-tagline">{{ guide.tagline|default:"Local Expert & Passionate Guide" }}</p>
+        <div class="gp-meta">
+          <span>📍 {{ guide.get_city_display }}, Azerbaijan</span>
+          <span class="gp-meta-sep">·</span>
+          <span>🗣 {{ guide.get_languages_list|join:", "|title }}</span>
+          <span class="gp-meta-sep">·</span>
+          <span>{{ guide.experience_years }} yr{{ guide.experience_years|pluralize }} experience</span>
+          {% if guide.total_reviews > 0 %}
+            <span class="gp-meta-sep">·</span>
+            <span class="gp-meta-rating">★ {{ guide.rating }} ({{ guide.total_reviews }} reviews)</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="gp-actions">
+        {% if user.is_authenticated and user.pk != guide.user.pk %}
+          <a href="{% url 'chat:start' guide.user.pk %}" class="btn btn-white btn-sm">💬 Message</a>
+          <button class="btn btn-sm gp-save-btn fav-btn" data-guide-id="{{ guide.pk }}" type="button">
+            {% if is_favorite %}❤ Saved{% else %}🤍 Save{% endif %}
+          </button>
+        {% elif not user.is_authenticated %}
+          <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-sm">Book Now</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Stats Bar ═══ -->
+<div class="gp-stats-bar">
+  <div class="container">
+    <div class="gp-stats-inner">
+      <div class="gp-stat">
+        <span class="gp-stat-num">{{ tours|length }}</span>
+        <span class="gp-stat-label">Tours Available</span>
+      </div>
+      <div class="gp-stat-divider"></div>
+      <div class="gp-stat">
+        <span class="gp-stat-num">{{ completed_tours_count }}</span>
+        <span class="gp-stat-label">Tours Completed</span>
+      </div>
+      <div class="gp-stat-divider"></div>
+      <div class="gp-stat">
+        <span class="gp-stat-num">{{ guide.experience_years }}</span>
+        <span class="gp-stat-label">Years Experience</span>
+      </div>
+      <div class="gp-stat-divider"></div>
+      <div class="gp-stat">
+        {% if guide.total_reviews > 0 %}
+          <span class="gp-stat-num">{{ guide.rating }}<span style="font-size:.65em;font-weight:500;opacity:.6;">/5</span></span>
+        {% else %}
+          <span class="gp-stat-num" style="font-size:1.1rem;">New</span>
+        {% endif %}
+        <span class="gp-stat-label">Avg Rating</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Body ═══ -->
+<div class="container" style="padding-top:var(--space-10);padding-bottom:var(--space-16);">
+  <div class="gp-layout">
+
+    <!-- ── Left: Main Content ── -->
+    <div class="gp-main">
+
+      <!-- About -->
+      <div class="gp-section reveal">
+        <h2 class="gp-section-title">About {{ guide.user.first_name }}</h2>
+        <p class="gp-bio">{{ guide.bio }}</p>
+        <div class="guide-tags" style="margin-top:var(--space-4);">
+          {% for lang in guide.get_languages_list %}
+            <span class="lang-tag">{{ lang|title }}</span>
+          {% endfor %}
+          {% if guide.license_number %}
+            <span class="lang-tag" style="background:var(--teal-500);color:white;border-color:var(--teal-500);">
+              Licensed: {{ guide.license_number }}
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Tours Grid -->
+      {% if tours %}
+      <div class="gp-section reveal">
+        <div class="gp-section-head">
+          <h2 class="gp-section-title">Tours & Experiences</h2>
+          <span class="gp-section-count">{{ tours|length }} tour{{ tours|length|pluralize }}</span>
+        </div>
+        <div class="tour-cards-grid">
+          {% for tour in tours %}
+            {% include 'partials/tour_card.html' with show_guide=False %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Reviews -->
+      {% if reviews %}
+      <div class="gp-section reveal">
+        <div class="gp-section-head">
+          <h2 class="gp-section-title">
+            Reviews
+            {% if guide.total_reviews > 0 %}
+              <span class="profile-rating-badge">★ {{ guide.rating }}</span>
+            {% endif %}
+          </h2>
+          <span class="gp-section-count">{{ review_count }} review{{ review_count|pluralize }}</span>
+        </div>
+        <div class="reviews-grid">
+          {% for review in reviews %}
+          <div class="review-card">
+            <div class="reviewer-info">
+              <div class="reviewer-avatar">
+                {% if review.tourist.avatar %}
+                  <img src="{{ review.tourist.avatar.url }}" alt="">
+                {% else %}
+                  {{ review.tourist.first_name|first|upper }}
+                {% endif %}
+              </div>
+              <div style="flex:1;">
+                <div style="font-weight:600;">{{ review.tourist.first_name }} {{ review.tourist.last_name|first }}.</div>
+                <div class="review-date">{{ review.created_at|date:"M d, Y" }}</div>
+              </div>
+              <div class="review-stars">
+                {% for i in '12345' %}{% if forloop.counter <= review.rating %}★{% endif %}{% endfor %}
+              </div>
+            </div>
+            {% if review.title %}<div class="review-title">{{ review.title }}</div>{% endif %}
+            <p class="review-body">{{ review.body }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Gallery -->
+      {% if photos %}
+      <div class="gp-section reveal">
+        <h2 class="gp-section-title">Photos</h2>
+        {% if photos|length == 1 %}
+          <div class="gp-gallery--single">
+            <img src="{{ photos.0.image.url }}" alt="{{ guide.user.get_full_name }}">
+          </div>
+        {% elif photos|length == 2 %}
+          <div class="gp-gallery--two">
+            {% for photo in photos %}
+            <img src="{{ photo.image.url }}" alt="">
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="gp-gallery--grid">
+            <div class="gp-gallery-main">
+              <img src="{{ photos.0.image.url }}" alt="">
+            </div>
+            <div class="gp-gallery-side">
+              {% for photo in photos|slice:"1:5" %}
+              <img src="{{ photo.image.url }}" alt="">
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- ── Right: Booking Widget ── -->
+    <div class="booking-widget">
+
+      <!-- Price & Book -->
+      <div class="card reveal">
+        <div class="card-body">
+          {% if guide.total_reviews > 0 %}
+          <div class="bw-price-row">
+            <div style="font-size:.88rem;color:var(--text-muted);">{{ guide.tours.count }} tour{{ guide.tours.count|pluralize }} available</div>
+            <div class="bw-rating">
+              <span class="bw-rating-star">★</span>
+              <span class="bw-rating-num">{{ guide.rating }}</span>
+              <div style="font-size:.72rem;color:var(--text-muted);">{{ guide.total_reviews }} reviews</div>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if user.is_authenticated and user.pk != guide.user.pk %}
+            <a href="{% url 'bookings:create' guide.pk %}" class="btn btn-primary" style="width:100%;margin-bottom:10px;">
+              Book {{ guide.user.first_name }}
+            </a>
+            <a href="{% url 'chat:start' guide.user.pk %}" class="btn btn-outline" style="width:100%;margin-bottom:var(--space-5);">
+              Send Message
+            </a>
+          {% elif not user.is_authenticated %}
+            <a href="{% url 'accounts:login' %}?next={% url 'bookings:create' guide.pk %}" class="btn btn-primary" style="width:100%;margin-bottom:var(--space-5);">
+              Log In to Book
+            </a>
+          {% endif %}
+
+          <ul class="trust-list">
+            <li>Free cancellation up to 24h before</li>
+            <li>Verified identity & guide license</li>
+            <li>Secure payment on TripAZ</li>
+            <li>Direct communication with guide</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Guide Info -->
+      <div class="card reveal" style="margin-top:16px;">
+        <div class="card-body">
+          <h4 style="margin-bottom:var(--space-4);font-size:.95rem;color:var(--navy-800);">Guide Details</h4>
+          <div class="gp-info-rows">
+            <div class="gp-info-row">
+              <span>Location</span>
+              <span>{{ guide.get_city_display }}, Azerbaijan</span>
+            </div>
+            <div class="gp-info-row">
+              <span>Experience</span>
+              <span>{{ guide.experience_years }} year{{ guide.experience_years|pluralize }}</span>
+            </div>
+            <div class="gp-info-row">
+              <span>Languages</span>
+              <span>{{ guide.get_languages_list|join:", "|title }}</span>
+            </div>
+            <div class="gp-info-row">
+              <span>Tours offered</span>
+              <span>{{ tours|length }}</span>
+            </div>
+            {% if guide.license_number %}
+            <div class="gp-info-row">
+              <span>License</span>
+              <span>{{ guide.license_number }}</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Availability -->
+      {% if availability_dates %}
+      <div class="card reveal" style="margin-top:16px;">
+        <div class="card-body">
+          <h4 style="margin-bottom:var(--space-3);font-size:.95rem;color:var(--navy-800);">Availability</h4>
+          <div class="avail-pills">
+            {% for date in availability_dates|slice:":10" %}
+            <span class="avail-pill">{{ date }}</span>
+            {% endfor %}
+            {% if availability_dates|length > 10 %}
+            <span style="color:var(--text-muted);font-size:.78rem;align-self:center;">+{{ availability_dates|length|add:"-10" }} more</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

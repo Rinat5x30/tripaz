@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body_class %}page-home{% endblock %}
+{% block main_class %}main--flush{% endblock %}
+
+{% block content %}
+
+<!-- Cinematic Hero -->
+<section class="hero" id="hero">
+  <div class="hero-bg" data-parallax="0.3"></div>
+  <div class="hero-particles"></div>
+  <div class="container">
+    <div class="hero-content reveal">
+      <div class="hero-badge">🇦🇿 Azerbaijan's Trusted Guide Marketplace</div>
+      <h1>Discover Azerbaijan with <span class="highlight">Local Experts</span></h1>
+      <p class="hero-lead">Book verified guides for authentic experiences — from Baku's ancient walls to Sheki's mountain trails.</p>
+
+      <form action="{% url 'guides:catalog' %}" method="get" class="search-bar">
+        <div class="search-field">
+          <span class="search-icon">🔍</span>
+          <input type="text" name="q" placeholder="Search guides, tours, experiences...">
+        </div>
+        <div class="search-field">
+          <span class="search-icon">📍</span>
+          <select name="city" aria-label="City">
+            <option value="">Any City</option>
+            <option value="baku">Baku</option>
+            <option value="sheki">Sheki</option>
+            <option value="ganja">Ganja</option>
+            <option value="quba">Quba</option>
+            <option value="gabala">Gabala</option>
+            <option value="lankaran">Lankaran</option>
+          </select>
+        </div>
+        <div class="search-field">
+          <span class="search-icon">🌐</span>
+          <select name="language" aria-label="Language">
+            <option value="">Any Language</option>
+            <option value="english">English</option>
+            <option value="russian">Russian</option>
+            <option value="german">German</option>
+            <option value="french">French</option>
+            <option value="arabic">Arabic</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+
+      <div class="hero-features">
+        <div class="hero-feature reveal reveal-delay-1">
+          <span>🛡</span> Verified Guides Only
+        </div>
+        <div class="hero-feature reveal reveal-delay-2">
+          <span>💳</span> Secure Payments
+        </div>
+        <div class="hero-feature reveal reveal-delay-2">
+          <span>💬</span> Direct Messaging
+        </div>
+        <div class="hero-feature reveal reveal-delay-3">
+          <span>⭐</span> Real Traveler Reviews
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Featured Destinations -->
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="eyebrow">Explore Azerbaijan</div>
+      <h2>Featured Destinations</h2>
+      <p>From the Caspian coast to Caucasus peaks — find your perfect adventure.</p>
+    </div>
+    <div class="destinations-grid">
+      <a href="{% url 'guides:catalog' %}?city=baku" class="destination-card reveal">
+        <div class="dest-bg" style="background:linear-gradient(160deg,#0f2340 0%,#254d85 100%);"></div>
+        <div class="dest-overlay">
+          <h3>Baku</h3>
+          <p>Old City, Flame Towers & Caspian charm</p>
+          <span class="dest-count">Explore guides →</span>
+        </div>
+      </a>
+      <a href="{% url 'guides:catalog' %}?city=sheki" class="destination-card reveal reveal-delay-1">
+        <div class="dest-bg" style="background:linear-gradient(160deg,#152d52 0%,#229690 100%);"></div>
+        <div class="dest-overlay">
+          <h3>Sheki</h3>
+          <p>Palaces, crafts & mountain serenity</p>
+          <span class="dest-count">Explore guides →</span>
+        </div>
+      </a>
+      <a href="{% url 'guides:catalog' %}?city=quba" class="destination-card reveal reveal-delay-2">
+        <div class="dest-bg" style="background:linear-gradient(160deg,#0a1628 0%,#2bb8b0 100%);"></div>
+        <div class="dest-overlay">
+          <h3>Quba & Gabala</h3>
+          <p>Forests, waterfalls & fresh air</p>
+          <span class="dest-count">Explore guides →</span>
+        </div>
+      </a>
+      <a href="{% url 'guides:catalog' %}?city=ganja" class="destination-card reveal reveal-delay-3">
+        <div class="dest-bg" style="background:linear-gradient(160deg,#1a3c5e 0%,#c49a3c 100%);"></div>
+        <div class="dest-overlay">
+          <h3>Ganja & Regions</h3>
+          <p>History, wine routes & hidden gems</p>
+          <span class="dest-count">Explore guides →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Guides -->
+<section class="section" style="background:var(--sand-50);">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="eyebrow">Top Rated</div>
+      <h2>Meet Our Featured Guides</h2>
+      <p>Handpicked professionals loved by travelers from over 40 countries.</p>
+    </div>
+
+    {% if featured_guides %}
+    <div class="grid-3" style="margin-bottom:48px;">
+      {% for guide in featured_guides %}
+        {% include 'partials/guide_card.html' %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state reveal">
+      <div class="icon">🧭</div>
+      <h3>Guides coming soon</h3>
+      <p>Our first guides are being verified. Check back soon!</p>
+    </div>
+    {% endif %}
+
+    <div style="text-align:center;" class="reveal">
+      <a href="{% url 'guides:catalog' %}" class="btn btn-secondary btn-lg">View All Guides →</a>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="section steps-section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="eyebrow" style="color:var(--gold-400);">Simple Process</div>
+      <h2 style="color:white;">How TripAZ Works</h2>
+      <p style="color:rgba(255,255,255,.6);">Book authentic experiences in three effortless steps.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <div class="step-number">1</div>
+        <h3>Search & Discover</h3>
+        <p>Browse verified guides by city, language, or budget.</p>
+      </div>
+      <div class="step-card reveal reveal-delay-1">
+        <div class="step-number">2</div>
+        <h3>Book & Pay Safely</h3>
+        <p>Choose your date, confirm details, and pay securely on-platform.</p>
+      </div>
+      <div class="step-card reveal reveal-delay-2">
+        <div class="step-number">3</div>
+        <h3>Experience & Review</h3>
+        <p>Enjoy an unforgettable journey, then share your story.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+{% if recent_reviews %}
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="eyebrow">Social Proof</div>
+      <h2>What Travelers Say</h2>
+    </div>
+    <div class="grid-3">
+      {% for review in recent_reviews %}
+      <div class="testimonial-card reveal">
+        <div class="reviewer-info">
+          <div class="reviewer-avatar">
+            {% if review.tourist.avatar %}
+              <img src="{{ review.tourist.avatar.url }}" alt="">
+            {% else %}
+              {{ review.tourist.first_name|first|default:"?" }}
+            {% endif %}
+          </div>
+          <div>
+            <div style="font-weight:600;">{{ review.tourist.first_name }} {{ review.tourist.last_name|first }}.</div>
+            <div class="review-date">{{ review.created_at|date:"M d, Y" }}</div>
+          </div>
+          <div class="review-rating" style="margin-left:auto;">
+            {% for i in '12345' %}{% if forloop.counter <= review.rating %}★{% endif %}{% endfor %}
+          </div>
+        </div>
+        {% if review.title %}<div style="font-weight:600;margin-bottom:8px;">{{ review.title }}</div>{% endif %}
+        <p style="font-size:.92rem;font-style:italic;color:var(--text-secondary);line-height:1.6;">"{{ review.body|truncatewords:28 }}"</p>
+        <div style="margin-top:16px;font-size:.82rem;color:var(--text-muted);">
+          Tour with <a href="{% url 'guides:profile' review.guide.pk %}" style="color:var(--navy-700);font-weight:600;">{{ review.guide.user.get_full_name }}</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- CTA -->
+<section class="cta-banner">
+  <div class="cta-banner-bg"></div>
+  <div class="container reveal">
+    <h2>Are You a Local Guide?</h2>
+    <p>Join verified guides on TripAZ. Earn income sharing the homeland you love.</p>
+    <div class="cta-actions">
+      <a href="{% url 'guides:register' %}" class="btn btn-primary btn-lg">Become a Guide</a>
+      <a href="{% url 'guides:catalog' %}" class="btn btn-white btn-lg">Browse Experiences</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+

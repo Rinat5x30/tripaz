@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Confirmed! — TripAZ{% endblock %}
+
+{% block content %}
+<div style="min-height:70vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;">
+  <div style="max-width:520px;width:100%;text-align:center;">
+    <div style="font-size:4rem;margin-bottom:20px;">🎉</div>
+    <h1 style="color:var(--success);margin-bottom:8px;">Booking Confirmed!</h1>
+    <p style="font-size:1.05rem;margin-bottom:32px;">Your tour is booked! The guide will receive your details and confirm shortly.</p>
+
+    <div class="card" style="text-align:left;margin-bottom:24px;">
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+          <div style="width:52px;height:52px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;color:white;font-size:1.4rem;">✓</div>
+          <div>
+            <div style="font-weight:800;font-size:1rem;">Booking {{ booking.booking_ref }}</div>
+            <div style="font-size:.82rem;color:var(--text-muted);">Confirmed · Payment received</div>
+          </div>
+        </div>
+
+        <div style="display:grid;gap:10px;font-size:.9rem;">
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-muted);">Guide</span>
+            <span style="font-weight:600;">{{ booking.guide.user.get_full_name }}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-muted);">Date</span>
+            <span style="font-weight:600;">{{ booking.booking_date }}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-muted);">Time</span>
+            <span style="font-weight:600;">{{ booking.booking_time }}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-muted);">People</span>
+            <span style="font-weight:600;">{{ booking.people_count }}</span>
+          </div>
+          {% if booking.tour %}
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-muted);">Tour</span>
+            <span style="font-weight:600;">{{ booking.tour.title }}</span>
+          </div>
+          {% endif %}
+          <div style="display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);">
+            <span style="font-weight:700;">Amount Paid</span>
+            <span style="font-weight:800;color:var(--primary);font-size:1.05rem;">{{ booking.total_price }} AZN</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="{% url 'chat:start' booking.guide.user.pk %}" class="btn btn-primary">💬 Message Your Guide</a>
+      <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline">📊 My Bookings</a>
+    </div>
+
+    <p style="font-size:.82rem;color:var(--text-muted);margin-top:20px;">
+      A confirmation has been sent to {{ user.email }}
+    </p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Support — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container"><h1>🎧 Support Center</h1><p style="color:rgba(255,255,255,.7);">We typically respond within 24 hours.</p></div>
+</div>
+<div class="container section-sm" style="max-width:580px;">
+  <div class="card">
+    <div class="card-body">
+      <h3 style="margin-bottom:20px;">Submit a Support Request</h3>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select name="category" class="form-control">
+            {% for val, label in categories %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject *</label>
+          <input type="text" name="subject" class="form-control" placeholder="Brief description of your issue" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description *</label>
+          <textarea name="description" class="form-control" rows="5" placeholder="Please describe your issue in detail..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Send Request</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <div class="card-body">
+      <h4 style="margin-bottom:12px;">Quick Help</h4>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:.9rem;">
+        <div>📧 <strong>Email:</strong> support@tripaz.az</div>
+        <div>🕐 <strong>Hours:</strong> Mon–Fri 9:00–18:00 (Baku time)</div>
+        <div>⏱ <strong>Response:</strong> Within 24 hours</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

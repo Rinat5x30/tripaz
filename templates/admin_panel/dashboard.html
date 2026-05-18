@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container"><h1>⚙ Admin Dashboard</h1><p style="color:rgba(255,255,255,.7);">TripAZ Platform Overview</p></div>
+</div>
+
+<div class="container section-sm">
+  <div class="admin-layout">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div style="font-weight:700;font-size:.95rem;margin-bottom:12px;padding:0 8px;">TripAZ Admin</div>
+      <div class="sidebar-title">Overview</div>
+      <a href="{% url 'core:admin_dashboard' %}" class="active">📊 Dashboard</a>
+      <a href="{% url 'core:admin_users' %}">👥 Users</a>
+      <div class="sidebar-title">Guides</div>
+      <a href="{% url 'core:admin_dashboard' %}#pending">⏳ Pending ({{ stats.pending_guides }})</a>
+      <div class="sidebar-title">Support</div>
+      <a href="{% url 'core:admin_tickets' %}">🎫 Tickets ({{ stats.open_tickets }})</a>
+      <div class="sidebar-title">System</div>
+      <a href="/admin/">🔧 Django Admin</a>
+    </aside>
+
+    <!-- Main -->
+    <div>
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card" style="border-left:4px solid var(--success);">
+          <div class="kpi-value" style="color:var(--success);">{{ stats.gmv|floatformat:0 }} AZN</div>
+          <div class="kpi-label">Total GMV</div>
+          <div class="kpi-change up">↑ +{{ stats.monthly_gmv|floatformat:0 }} this month</div>
+        </div>
+        <div class="kpi-card" style="border-left:4px solid var(--primary);">
+          <div class="kpi-value">{{ stats.total_bookings }}</div>
+          <div class="kpi-label">Total Bookings</div>
+          <div class="kpi-change up">↑ +{{ stats.monthly_bookings }} this month</div>
+        </div>
+        <div class="kpi-card" style="border-left:4px solid var(--accent);">
+          <div class="kpi-value">{{ stats.total_users }}</div>
+          <div class="kpi-label">Total Users</div>
+          <div class="kpi-change up">↑ Growing</div>
+        </div>
+        <div class="kpi-card" style="border-left:4px solid var(--teal);">
+          <div class="kpi-value">{{ stats.avg_rating|floatformat:1 }}⭐</div>
+          <div class="kpi-label">Avg Guide Rating</div>
+          <div class="kpi-change up">Platform quality</div>
+        </div>
+      </div>
+
+      <!-- Pending Guide Verifications -->
+      {% if pending_guides %}
+      <div class="card" id="pending" style="margin-bottom:24px;border:2px solid var(--warning);">
+        <div class="card-body">
+          <h3 style="margin-bottom:16px;color:var(--warning);">⏳ Pending Verifications ({{ pending_guides|length }})</h3>
+          {% for guide in pending_guides %}
+          <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:10px;flex-wrap:wrap;">
+            <div>
+              <div style="font-weight:700;">{{ guide.user.get_full_name }}</div>
+              <div style="font-size:.82rem;color:var(--text-muted);">{{ guide.user.email }} · {{ guide.city }} · {{ guide.experience_years }}yr exp</div>
+              <div style="font-size:.82rem;margin-top:2px;">Languages: {{ guide.languages }}</div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:8px;">
+              <a href="{% url 'core:admin_verify_guide' guide.pk %}" class="btn btn-sm btn-primary">Review →</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Top Guides -->
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-body">
+          <h3 style="margin-bottom:16px;">🏆 Top Performing Guides</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Guide</th><th>City</th><th>Rating</th><th>Bookings</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {% for guide in top_guides %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td style="font-weight:600;">{{ guide.user.get_full_name }}</td>
+                  <td>{{ guide.get_city_display }}</td>
+                  <td>⭐ {{ guide.rating }}</td>
+                  <td>{{ guide.booking_count }}</td>
+                  <td><span class="status status-{{ guide.verification_status }}">{{ guide.get_verification_status_display }}</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No data yet</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Bookings -->
+      <div class="card">
+        <div class="card-body">
+          <h3 style="margin-bottom:16px;">Recent Bookings</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Ref</th><th>Tourist</th><th>Guide</th><th>Date</th><th>Amount</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {% for booking in recent_bookings %}
+                <tr>
+                  <td style="font-family:monospace;font-size:.82rem;">{{ booking.booking_ref }}</td>
+                  <td>{{ booking.tourist.get_full_name }}</td>
+                  <td>{{ booking.guide.user.get_full_name }}</td>
+                  <td>{{ booking.booking_date }}</td>
+                  <td style="font-weight:600;">{{ booking.total_price }} AZN</td>
+                  <td><span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No bookings yet</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

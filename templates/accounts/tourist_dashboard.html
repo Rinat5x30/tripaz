@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}My Dashboard — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container flex-between" style="flex-wrap:wrap;gap:12px;">
+    <div>
+      <h1>My Dashboard</h1>
+      <p style="color:rgba(255,255,255,.7);">Welcome back, {{ user.first_name }}!</p>
+    </div>
+    <a href="{% url 'guides:catalog' %}" class="btn btn-primary">🔍 Find Guides</a>
+  </div>
+</div>
+
+<div class="container section-sm">
+  <div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div style="text-align:center;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px;">
+        {% if user.avatar %}
+          <img src="{{ user.avatar.url }}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;margin-bottom:8px;">
+        {% else %}
+          <div style="width:64px;height:64px;border-radius:50%;background:var(--primary);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.5rem;font-weight:700;">
+            {{ user.first_name|first }}{{ user.last_name|first }}
+          </div>
+        {% endif %}
+        <div style="font-weight:700;">{{ user.get_full_name|default:user.username }}</div>
+        <div style="font-size:.8rem;color:var(--text-muted);">Tourist · {{ user.email }}</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="{% url 'accounts:dashboard' %}" class="active"><span class="icon">🗓</span> My Bookings</a>
+        <a href="{% url 'chat:inbox' %}"><span class="icon">💬</span> Messages</a>
+        <a href="{% url 'core:notifications' %}"><span class="icon">🔔</span> Notifications</a>
+        <a href="{% url 'accounts:profile_edit' %}"><span class="icon">✏</span> Edit Profile</a>
+        <a href="{% url 'core:support' %}"><span class="icon">🎧</span> Support</a>
+        <a href="{% url 'accounts:logout' %}" style="color:var(--danger);margin-top:8px;"><span class="icon">↩</span> Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div>
+      <!-- Stats -->
+      <div class="grid-4" style="margin-bottom:24px;">
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <span class="stat-value">{{ stats.total_bookings }}</span>
+              <div class="stat-label">Total Bookings</div>
+            </div>
+            <div class="stat-icon blue">🗓</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <span class="stat-value">{{ stats.completed }}</span>
+              <div class="stat-label">Completed Tours</div>
+            </div>
+            <div class="stat-icon green">✓</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <span class="stat-value">{{ stats.upcoming }}</span>
+              <div class="stat-label">Upcoming</div>
+            </div>
+            <div class="stat-icon orange">🕐</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <span class="stat-value">{{ stats.total_spent }} AZN</span>
+              <div class="stat-label">Total Spent</div>
+            </div>
+            <div class="stat-icon purple">💳</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bookings -->
+      <div class="card">
+        <div class="card-body">
+          <h3 style="margin-bottom:16px;">My Bookings</h3>
+          {% if bookings %}
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ref</th>
+                  <th>Guide</th>
+                  <th>Tour</th>
+                  <th>Date</th>
+                  <th>People</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for booking in bookings %}
+                <tr>
+                  <td style="font-family:monospace;font-weight:700;">{{ booking.booking_ref }}</td>
+                  <td>
+                    <a href="{% url 'guides:profile' booking.guide.pk %}" style="font-weight:600;color:var(--primary);">
+                      {{ booking.guide.user.get_full_name }}
+                    </a>
+                  </td>
+                  <td style="font-size:.85rem;">{{ booking.tour.title|default:"Hourly Booking" }}</td>
+                  <td>{{ booking.booking_date }}</td>
+                  <td>{{ booking.people_count }}</td>
+                  <td style="font-weight:600;">{{ booking.total_price }} AZN</td>
+                  <td><span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span></td>
+                  <td>
+                    <div style="display:flex;gap:6px;">
+                      {% if booking.status == 'completed' and not booking.review %}
+                        <a href="{% url 'reviews:create' booking.pk %}" class="btn btn-sm btn-teal">⭐ Review</a>
+                      {% endif %}
+                      {% if booking.status in 'pending,confirmed' %}
+                        <a href="{% url 'bookings:cancel' booking.pk %}" class="btn btn-sm btn-outline" onclick="return confirm('Cancel this booking?')">Cancel</a>
+                      {% endif %}
+                      <a href="{% url 'chat:start' booking.guide.user.pk %}" class="btn btn-sm btn-outline">💬</a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <div class="icon">🗓</div>
+            <h3>No bookings yet</h3>
+            <p>Book your first tour with a local guide in Azerbaijan!</p>
+            <a href="{% url 'guides:catalog' %}" class="btn btn-primary">Find Guides</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Favorites -->
+      {% if favorites %}
+      <div class="card" style="margin-top:20px;">
+        <div class="card-body">
+          <h3 style="margin-bottom:16px;">❤️ Saved Guides</h3>
+          <div class="grid-3">
+            {% for fav in favorites %}
+            <a href="{% url 'guides:profile' fav.guide.pk %}" class="card" style="display:flex;align-items:center;gap:12px;padding:12px;">
+              <div style="width:44px;height:44px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;flex-shrink:0;">
+                {{ fav.guide.user.first_name|first }}
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:.9rem;">{{ fav.guide.user.get_full_name }}</div>
+                <div style="font-size:.78rem;color:var(--text-muted);">{{ fav.guide.get_city_display }}</div>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

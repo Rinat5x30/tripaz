@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Edit Profile — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container"><h1>✏ Edit Profile</h1></div>
+</div>
+<div class="container section-sm" style="max-width:540px;">
+  <div class="card">
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            {% render_field form.first_name class="form-control" %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            {% render_field form.last_name class="form-control" %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          {% render_field form.phone class="form-control" %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Country</label>
+          {% render_field form.country class="form-control" %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bio</label>
+          {% render_field form.bio class="form-control" rows="3" %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Profile Photo</label>
+          {% render_field form.avatar class="form-control" %}
+          {% if user.avatar %}
+          <div style="margin-top:8px;"><img src="{{ user.avatar.url }}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;"></div>
+          {% endif %}
+        </div>
+        <div style="display:flex;gap:12px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;">Save Changes</button>
+          <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

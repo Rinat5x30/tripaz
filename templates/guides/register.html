@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Become a Guide — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>Become a TripAZ Guide</h1>
+    <p style="color:rgba(255,255,255,.7);">Join our verified guide community and earn income sharing Azerbaijan.</p>
+  </div>
+</div>
+
+<div class="container section-sm" style="max-width:700px;">
+  <div class="card">
+    <div class="card-body">
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;text-align:center;padding-bottom:20px;border-bottom:1px solid var(--border);">
+        <div><div style="font-size:1.8rem;margin-bottom:6px;">📋</div><div style="font-size:.85rem;font-weight:600;">Submit Application</div></div>
+        <div><div style="font-size:1.8rem;margin-bottom:6px;">🔍</div><div style="font-size:.85rem;font-weight:600;">We Verify (24h)</div></div>
+        <div><div style="font-size:1.8rem;margin-bottom:6px;">🚀</div><div style="font-size:.85rem;font-weight:600;">Start Earning</div></div>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger" style="margin-bottom:20px;">
+          {% for error in form.non_field_errors %}
+            <p style="margin:0;">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <h4 style="margin-bottom:16px;color:var(--text-muted);text-transform:uppercase;font-size:.78rem;letter-spacing:.08em;">Personal Info</h4>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            {% if form.first_name.errors %}
+              {% render_field form.first_name class="form-control is-invalid" %}
+              <div class="form-error">{{ form.first_name.errors|join:", " }}</div>
+            {% else %}
+              {% render_field form.first_name class="form-control" %}
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name *</label>
+            {% if form.last_name.errors %}
+              {% render_field form.last_name class="form-control is-invalid" %}
+              <div class="form-error">{{ form.last_name.errors|join:", " }}</div>
+            {% else %}
+              {% render_field form.last_name class="form-control" %}
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Phone Number *</label>
+          {% if form.phone.errors %}
+            {% render_field form.phone class="form-control is-invalid" placeholder="+994 50 000 00 00" %}
+            <div class="form-error">{{ form.phone.errors|join:", " }}</div>
+          {% else %}
+            {% render_field form.phone class="form-control" placeholder="+994 50 000 00 00" %}
+          {% endif %}
+        </div>
+
+        <h4 style="margin:20px 0 16px;color:var(--text-muted);text-transform:uppercase;font-size:.78rem;letter-spacing:.08em;">Guide Profile</h4>
+
+        <div class="form-group">
+          <label class="form-label">Bio / About You *</label>
+          {% if form.bio.errors %}
+            {% render_field form.bio class="form-control is-invalid" placeholder="Tell tourists about yourself, your expertise, and what makes your tours special..." %}
+            <div class="form-error">{{ form.bio.errors|join:", " }}</div>
+          {% else %}
+            {% render_field form.bio class="form-control" placeholder="Tell tourists about yourself, your expertise, and what makes your tours special..." %}
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tagline</label>
+          {% render_field form.tagline class="form-control" placeholder="e.g. Your window into the soul of Baku" %}
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Base City *</label>
+            {% if form.city.errors %}
+              {% render_field form.city class="form-control is-invalid" %}
+              <div class="form-error">{{ form.city.errors|join:", " }}</div>
+            {% else %}
+              {% render_field form.city class="form-control" %}
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Years of Experience *</label>
+            {% if form.experience_years.errors %}
+              {% render_field form.experience_years class="form-control is-invalid" min="0" %}
+              <div class="form-error">{{ form.experience_years.errors|join:", " }}</div>
+            {% else %}
+              {% render_field form.experience_years class="form-control" min="0" %}
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Languages Spoken *</label>
+          {% if form.languages.errors %}
+            <div class="checkbox-grid" style="border:1px solid var(--danger);border-radius:var(--radius-sm);padding:12px;">
+          {% else %}
+            <div class="checkbox-grid">
+          {% endif %}
+            {% for value, label in form.fields.languages.choices %}
+            <label class="checkbox-item">
+              <input type="checkbox" name="languages" value="{{ value }}"
+                {% if value in form.languages.value %}checked{% endif %}>
+              {{ label }}
+            </label>
+            {% endfor %}
+          </div>
+          {% if form.languages.errors %}
+            <div class="form-error">{{ form.languages.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Guide License Number</label>
+          {% render_field form.license_number class="form-control" placeholder="AZ-GUIDE-XXXXX" %}
+          <div class="form-hint">Optional — enter if you have an official license number</div>
+        </div>
+
+        <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+          {% render_field form.has_certificate style="width:auto;" %}
+          <label class="form-label" style="margin:0;">I have an official guide certificate</label>
+        </div>
+
+        <h4 style="margin:20px 0 16px;color:var(--text-muted);text-transform:uppercase;font-size:.78rem;letter-spacing:.08em;">Documents <span style="font-weight:400;text-transform:none;font-size:.8rem;">(all optional)</span></h4>
+
+        <div class="form-group">
+          <label class="form-label">Passport Copy <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+          {% render_field form.passport class="form-control" %}
+          {% if form.passport.errors %}
+            <div class="form-error">{{ form.passport.errors|join:", " }}</div>
+          {% endif %}
+          <div class="form-hint">JPG, PNG or PDF, max 5MB</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Guide License / Certificate <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+          {% render_field form.license_doc class="form-control" %}
+          {% if form.license_doc.errors %}
+            <div class="form-error">{{ form.license_doc.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Professional Photo <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+          {% render_field form.photo class="form-control" %}
+          {% if form.photo.errors %}
+            <div class="form-error">{{ form.photo.errors|join:", " }}</div>
+          {% endif %}
+          <div class="form-hint">Clear headshot, min 400×400px</div>
+        </div>
+
+        <div style="background:#eff6ff;border-radius:var(--radius-sm);padding:14px;margin-bottom:20px;font-size:.85rem;">
+          <strong>📋 What happens next:</strong><br>
+          Our team reviews your documents within 24 hours. You'll receive an email notification when approved.
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Submit Application</button>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

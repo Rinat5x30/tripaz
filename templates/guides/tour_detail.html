@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ tour.title }} — TripAZ{% endblock %}
+
+{% block content %}
+
+<!-- ═══ Content ═══ -->
+<div class="container">
+
+  <!-- Breadcrumb -->
+  <div class="td-breadcrumb">
+    <a href="{% url 'guides:catalog' %}">Find Guides</a>
+    <span>›</span>
+    <a href="{% url 'guides:profile' guide.pk %}">{{ guide.user.get_full_name }}</a>
+    <span>›</span>
+    <span>{{ tour.title }}</span>
+  </div>
+
+  <div class="td-layout">
+
+    <!-- ── Left: Tour Info ── -->
+    <div class="td-main">
+
+      <!-- Header -->
+      <div class="td-header reveal">
+        {% if tour.category %}
+        <span class="tour-cat-badge">{{ tour.get_category_display }}</span>
+        {% endif %}
+        <h1 class="td-title">{{ tour.title }}</h1>
+        <div class="td-meta">
+          {% if tour.location %}
+            <span>📍 {{ tour.location }}</span>
+          {% else %}
+            <span>📍 {{ guide.get_city_display }}, Azerbaijan</span>
+          {% endif %}
+          {% if guide.total_reviews > 0 %}
+            <span>★ {{ guide.rating }} ({{ guide.total_reviews }} reviews)</span>
+          {% else %}
+            <span style="color:var(--text-muted);">New experience</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Highlights Bar -->
+      <div class="td-highlights reveal">
+        <div class="td-highlight">
+          <span class="td-hl-icon">⏱</span>
+          <div>
+            <div class="td-hl-label">Duration</div>
+            <div class="td-hl-value">{{ tour.duration_hours }} hours</div>
+          </div>
+        </div>
+        <div class="td-highlight">
+          <span class="td-hl-icon">👥</span>
+          <div>
+            <div class="td-hl-label">Group Size</div>
+            <div class="td-hl-value">Max {{ tour.max_people }} people</div>
+          </div>
+        </div>
+        <div class="td-highlight">
+          <span class="td-hl-icon">💰</span>
+          <div>
+            <div class="td-hl-label">Price</div>
+            <div class="td-hl-value">{{ tour.price_per_person }} AZN/person</div>
+          </div>
+        </div>
+        {% if tour.meeting_point %}
+        <div class="td-highlight">
+          <span class="td-hl-icon">📌</span>
+          <div>
+            <div class="td-hl-label">Meet At</div>
+            <div class="td-hl-value">{{ tour.meeting_point }}</div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Description -->
+      <div class="td-section reveal">
+        <h2 class="td-section-title">About This Tour</h2>
+        <p class="td-description">{{ tour.description }}</p>
+      </div>
+
+      <!-- Tour Gallery -->
+      {% with tour.images.all as imgs %}
+      {% if imgs %}
+      <div class="td-section reveal">
+        {% if imgs|length == 1 %}
+          <div class="gp-gallery--single">
+            <img src="{{ imgs.0.image.url }}" alt="{{ tour.title }}">
+          </div>
+        {% elif imgs|length == 2 %}
+          <div class="gp-gallery--two">
+            {% for img in imgs %}
+            <img src="{{ img.image.url }}" alt="">
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="gp-gallery--grid">
+            <div class="gp-gallery-main">
+              <img src="{{ imgs.0.image.url }}" alt="">
+            </div>
+            <div class="gp-gallery-side">
+              {% for img in imgs|slice:"1:5" %}
+              <img src="{{ img.image.url }}" alt="">
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <!-- Itinerary -->
+      {% if tour.itinerary %}
+      <div class="td-section reveal">
+        <h2 class="td-section-title">Tour Itinerary</h2>
+        <div class="td-itinerary">
+          {% for line in tour.get_itinerary_lines %}
+          <div class="td-itinerary-step">
+            <div class="td-step-dot">{{ forloop.counter }}</div>
+            <div class="td-step-text">{{ line }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Included / Not Included -->
+      {% if tour.included or tour.not_included %}
+      <div class="td-section reveal">
+        <h2 class="td-section-title">What's Included</h2>
+        <div class="td-included-grid">
+          {% if tour.included %}
+          <div>
+            <div class="td-included-head td-included-head--yes">Included</div>
+            <ul class="td-included-list td-included-list--yes">
+              {% for item in tour.get_included_list %}
+              <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+          {% if tour.not_included %}
+          <div>
+            <div class="td-included-head td-included-head--no">Not Included</div>
+            <ul class="td-included-list td-included-list--no">
+              {% for item in tour.get_not_included_list %}
+              <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Guide Info -->
+      <div class="td-section reveal">
+        <h2 class="td-section-title">Your Guide</h2>
+        <a href="{% url 'guides:profile' guide.pk %}" class="td-guide-card">
+          <div class="td-guide-avatar">
+            {% if guide.user.avatar %}
+              <img src="{{ guide.user.avatar.url }}" alt="{{ guide.user.get_full_name }}">
+            {% else %}
+              {{ guide.user.first_name|first|upper }}{{ guide.user.last_name|first|upper }}
+            {% endif %}
+          </div>
+          <div class="td-guide-info">
+            <div class="td-guide-name">
+              {{ guide.user.get_full_name }}
+              {% if guide.has_certificate %}
+                <span class="verified-badge" style="font-size:.7rem;padding:3px 8px;">✓ Verified</span>
+              {% endif %}
+            </div>
+            <div class="td-guide-meta">
+              {{ guide.get_city_display }}, Azerbaijan
+              · {{ guide.experience_years }} yr{{ guide.experience_years|pluralize }} experience
+              {% if guide.total_reviews > 0 %} · ★ {{ guide.rating }}{% endif %}
+            </div>
+            <p class="td-guide-bio">{{ guide.bio|truncatewords:25 }}</p>
+          </div>
+          <div class="td-guide-arrow">→</div>
+        </a>
+      </div>
+
+      <!-- Reviews -->
+      {% if reviews %}
+      <div class="td-section reveal">
+        <h2 class="td-section-title">
+          Traveler Reviews
+          {% if guide.total_reviews > 0 %}
+            <span class="profile-rating-badge">★ {{ guide.rating }}</span>
+          {% endif %}
+        </h2>
+        <div class="reviews-grid">
+          {% for review in reviews %}
+          <div class="review-card">
+            <div class="reviewer-info">
+              <div class="reviewer-avatar">
+                {% if review.tourist.avatar %}
+                  <img src="{{ review.tourist.avatar.url }}" alt="">
+                {% else %}
+                  {{ review.tourist.first_name|first|upper }}
+                {% endif %}
+              </div>
+              <div style="flex:1;">
+                <div style="font-weight:600;">{{ review.tourist.first_name }} {{ review.tourist.last_name|first }}.</div>
+                <div class="review-date">{{ review.created_at|date:"M d, Y" }}</div>
+              </div>
+              <div class="review-stars">
+                {% for i in '12345' %}{% if forloop.counter <= review.rating %}★{% endif %}{% endfor %}
+              </div>
+            </div>
+            {% if review.title %}<div class="review-title">{{ review.title }}</div>{% endif %}
+            <p class="review-body">{{ review.body }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Other Tours -->
+      {% if other_tours %}
+      <div class="td-section reveal">
+        <h2 class="td-section-title">More by {{ guide.user.first_name }}</h2>
+        <div class="tour-cards-grid">
+          {% for other_tour in other_tours %}
+            {% include 'partials/tour_card.html' with tour=other_tour show_guide=False %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- ── Right: Booking Widget ── -->
+    <div class="booking-widget">
+
+      <!-- Book Card -->
+      <div class="card reveal">
+        <div class="card-body">
+          <div class="bw-price-row" style="margin-bottom:var(--space-5);">
+            <div>
+              <div class="price-display">{{ tour.price_per_person }} AZN</div>
+              <div class="price-label">per person</div>
+            </div>
+          </div>
+
+          {% if user.is_authenticated %}
+            <a href="{% url 'bookings:create' guide.pk %}?tour={{ tour.pk }}" class="btn btn-primary" style="width:100%;margin-bottom:10px;">
+              Book This Tour
+            </a>
+            <a href="{% url 'chat:start' guide.user.pk %}" class="btn btn-outline" style="width:100%;margin-bottom:var(--space-5);">
+              Ask the Guide
+            </a>
+          {% else %}
+            <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary" style="width:100%;margin-bottom:var(--space-5);">
+              Log In to Book
+            </a>
+          {% endif %}
+
+          <div class="td-quick-facts">
+            <div class="td-quick-fact"><span>⏱ Duration</span><strong>{{ tour.duration_hours }}h</strong></div>
+            <div class="td-quick-fact"><span>👥 Group size</span><strong>Max {{ tour.max_people }}</strong></div>
+            {% if tour.category %}
+            <div class="td-quick-fact"><span>🏷 Category</span><strong>{{ tour.get_category_display }}</strong></div>
+            {% endif %}
+            {% if tour.meeting_point %}
+            <div class="td-quick-fact"><span>📌 Meet at</span><strong>{{ tour.meeting_point }}</strong></div>
+            {% endif %}
+          </div>
+
+          <ul class="trust-list" style="margin-top:var(--space-5);padding-top:var(--space-4);border-top:1px solid var(--border);">
+            <li>Free cancellation 24h before</li>
+            <li>Secure payment on TripAZ</li>
+            <li>Verified guide</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

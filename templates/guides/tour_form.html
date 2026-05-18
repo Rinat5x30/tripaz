@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ action }} Tour — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="{% url 'guides:dashboard' %}">Dashboard</a> › {{ action }} Tour</div>
+    <h1>{{ action }} Tour</h1>
+  </div>
+</div>
+
+<div class="container section-sm" style="max-width:680px;">
+  <div class="card">
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label">Tour Title *</label>
+          {% render_field form.title class="form-control" placeholder="e.g. Old City Baku Walking Tour" %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Duration (hours) *</label>
+          {% render_field form.duration_hours class="form-control" step="0.5" min="0.5" %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description *</label>
+          {% render_field form.description class="form-control" %}
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Price per Person (AZN) *</label>
+            {% render_field form.price_per_person class="form-control" min="5" %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Max Group Size *</label>
+            {% render_field form.max_people class="form-control" min="1" max="50" %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Itinerary / Program</label>
+          {% render_field form.itinerary class="form-control" %}
+          <div class="form-hint">Describe what happens step by step</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Meeting Point</label>
+          {% render_field form.meeting_point class="form-control" placeholder="e.g. Icheri Sheher Metro Station, Gate 1" %}
+        </div>
+
+        {% if action == 'Create' %}
+        <div class="form-group">
+          <label class="form-label">Фотографии тура</label>
+          <input type="file" name="images" id="tour-file-input" multiple accept="image/*" style="display:none;">
+          <div id="tour-dropzone" class="gallery-upload-zone" onclick="document.getElementById('tour-file-input').click()">
+            <div class="gallery-upload-inner">
+              <span style="font-size:1.8rem;line-height:1;">+</span>
+              <span style="font-weight:600;margin-top:4px;">Выберите фотографии</span>
+              <span style="font-size:.78rem;color:var(--text-muted);">JPG, PNG · до 8 фото</span>
+            </div>
+          </div>
+          <div id="tour-preview" style="display:none;margin-top:var(--space-3);">
+            <div id="tour-preview-grid" class="gallery-manage-grid" style="margin-bottom:var(--space-3);"></div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="resetTourUpload()">Сбросить выбор</button>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+          {% render_field form.is_active style="width:auto;" %}
+          <label class="form-label" style="margin:0;">Active (visible to tourists)</label>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn btn-primary btn-lg" style="flex:1;">
+            {% if action == 'Create' %}Create Tour{% else %}Save Changes{% endif %}
+          </button>
+          <a href="{% url 'guides:dashboard' %}" class="btn btn-outline btn-lg">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if action == 'Edit' %}
+  <!-- Photo management — separate card to avoid nested forms -->
+  <div class="card" style="margin-top:24px;">
+    <div class="card-body">
+      <h3 style="margin-bottom:6px;">Фотографии тура</h3>
+      <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:var(--space-4);">Загрузите фотографии для этого тура. До 8 снимков.</p>
+
+      {% with tour.images.all as imgs %}
+      {% if imgs %}
+      <div class="gallery-manage-grid" style="margin-bottom:var(--space-4);">
+        {% for img in imgs %}
+        <div class="gallery-manage-item">
+          <img src="{{ img.image.url }}" alt="">
+          <form method="post" action="{% url 'guides:delete_tour_image' tour.pk img.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="gallery-delete-btn" title="Удалить" onclick="return confirm('Удалить фото?')">✕</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <form method="post" action="{% url 'guides:upload_tour_photos' tour.pk %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="images" id="tour-file-input" multiple accept="image/*" style="display:none;">
+
+        <div id="tour-dropzone" class="gallery-upload-zone" onclick="document.getElementById('tour-file-input').click()">
+          <div class="gallery-upload-inner">
+            <span style="font-size:1.8rem;line-height:1;">+</span>
+            <span style="font-weight:600;margin-top:4px;">Выберите фотографии</span>
+            <span style="font-size:.78rem;color:var(--text-muted);">JPG, PNG · до 8 фото</span>
+          </div>
+        </div>
+
+        <div id="tour-preview" style="display:none;margin-top:var(--space-3);">
+          <div id="tour-preview-grid" class="gallery-manage-grid" style="margin-bottom:var(--space-3);"></div>
+          <div style="display:flex;gap:10px;">
+            <button type="submit" class="btn btn-primary" style="flex:1;">Загрузить фото</button>
+            <button type="button" class="btn btn-outline" onclick="resetTourUpload()">Отмена</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+(function() {
+  var input = document.getElementById('tour-file-input');
+  if (!input) return;
+  input.addEventListener('change', function() {
+    var files = Array.from(this.files);
+    var grid = document.getElementById('tour-preview-grid');
+    var preview = document.getElementById('tour-preview');
+    var dropzone = document.getElementById('tour-dropzone');
+    if (!files.length) { resetTourUpload(); return; }
+    grid.innerHTML = '';
+    files.forEach(function(file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var div = document.createElement('div');
+        div.className = 'gallery-manage-item';
+        var img = document.createElement('img');
+        img.src = e.target.result;
+        div.appendChild(img);
+        grid.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    });
+    dropzone.style.display = 'none';
+    preview.style.display = 'block';
+  });
+})();
+
+function resetTourUpload() {
+  var input = document.getElementById('tour-file-input');
+  var grid = document.getElementById('tour-preview-grid');
+  var preview = document.getElementById('tour-preview');
+  var dropzone = document.getElementById('tour-dropzone');
+  if (input) input.value = '';
+  if (grid) grid.innerHTML = '';
+  if (preview) preview.style.display = 'none';
+  if (dropzone) dropzone.style.display = 'block';
+}
+</script>
+
+{% endblock %}

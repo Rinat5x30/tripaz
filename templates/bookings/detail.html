@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Booking {{ booking.booking_ref }} — TripAZ{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container"><h1>Booking Details</h1></div>
+</div>
+<div class="container section-sm" style="max-width:640px;">
+  <div class="card">
+    <div class="card-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <div style="font-family:monospace;font-size:1.1rem;font-weight:800;">{{ booking.booking_ref }}</div>
+          <div style="font-size:.82rem;color:var(--text-muted);">Created {{ booking.created_at|date:"M d, Y H:i" }}</div>
+        </div>
+        <span class="status status-{{ booking.status }}" style="font-size:.9rem;padding:6px 16px;">{{ booking.get_status_display }}</span>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;font-size:.92rem;margin-bottom:20px;">
+        <div class="flex-between"><span style="color:var(--text-muted);">Tourist</span><span style="font-weight:600;">{{ booking.tourist.get_full_name }}</span></div>
+        <div class="flex-between"><span style="color:var(--text-muted);">Guide</span><span style="font-weight:600;">{{ booking.guide.user.get_full_name }}</span></div>
+        <div class="flex-between"><span style="color:var(--text-muted);">Date</span><span style="font-weight:600;">{{ booking.booking_date }}</span></div>
+        <div class="flex-between"><span style="color:var(--text-muted);">Time</span><span>{{ booking.booking_time }}</span></div>
+        <div class="flex-between"><span style="color:var(--text-muted);">People</span><span>{{ booking.people_count }}</span></div>
+        {% if booking.tour %}
+        <div class="flex-between"><span style="color:var(--text-muted);">Tour</span><span>{{ booking.tour.title }}</span></div>
+        {% endif %}
+        {% if booking.special_requests %}
+        <div><span style="color:var(--text-muted);">Requests:</span> {{ booking.special_requests }}</div>
+        {% endif %}
+        {% if booking.guide_message %}
+        <div><span style="color:var(--text-muted);">Guide note:</span> {{ booking.guide_message }}</div>
+        {% endif %}
+        <div class="flex-between" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+          <span style="font-weight:700;">Total</span>
+          <span style="font-weight:800;color:var(--primary);font-size:1.05rem;">{{ booking.total_price }} AZN</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        {% if booking.tourist == user %}
+          <a href="{% url 'chat:start' booking.guide.user.pk %}" class="btn btn-primary">💬 Message Guide</a>
+          {% if booking.status == 'completed' and not booking.review %}
+          <a href="{% url 'reviews:create' booking.pk %}" class="btn btn-teal">⭐ Leave Review</a>
+          {% endif %}
+          <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline">← Dashboard</a>
+        {% elif booking.guide.user == user %}
+          <a href="{% url 'chat:start' booking.tourist.pk %}" class="btn btn-primary">💬 Message Tourist</a>
+          <a href="{% url 'guides:dashboard' %}" class="btn btn-outline">← Dashboard</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

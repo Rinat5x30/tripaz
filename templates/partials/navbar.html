@@ -1,0 +1,150 @@
+{% load static %}
+<nav class="navbar {% block nav_variant %}navbar--solid{% endblock %}" id="site-navbar">
+  <div class="container">
+    <a href="{% url 'core:home' %}" class="navbar-brand">
+      Trip<span>AZ</span>
+    </a>
+
+    <div class="navbar-nav">
+      <a href="{% url 'core:home' %}" {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}>Home</a>
+      <a href="{% url 'guides:catalog' %}" {% if request.resolver_match.url_name == 'catalog' %}class="active"{% endif %}>Find Guides</a>
+      <a href="{% url 'guides:tour_catalog' %}" {% if request.resolver_match.url_name == 'tour_catalog' %}class="active"{% endif %}>Find Tours</a>
+      <a href="{% url 'core:about' %}" {% if request.resolver_match.url_name == 'about' %}class="active"{% endif %}>About</a>
+      <a href="{% url 'core:contacts' %}" {% if request.resolver_match.url_name == 'contacts' %}class="active"{% endif %}>Contact</a>
+    </div>
+
+    <div class="navbar-actions">
+      {% if user.is_authenticated %}
+        {% if user.is_staff or user.role == 'admin' or user.role == 'support' %}
+          <a href="{% url 'core:admin_dashboard' %}" class="btn btn-outline btn-sm">Admin</a>
+        {% endif %}
+
+        {% if user.role == 'tourist' or user.role == '' %}
+          {% if not user.guide_profile and not user.is_staff and user.role != 'admin' and user.role != 'support' %}
+            <a href="{% url 'guides:register' %}" class="btn btn-outline btn-sm navbar-guide-btn">Become a Guide</a>
+          {% endif %}
+          <a href="{% url 'accounts:favorites' %}" class="nav-notif{% if request.resolver_match.url_name == 'favorites' %} active{% endif %}" title="My Favourites">❤</a>
+        {% endif %}
+
+        <a href="{% url 'core:notifications' %}" class="nav-notif" title="Notifications">
+          🔔
+          {% if unread_notifications > 0 %}
+            <span class="badge">{{ unread_notifications }}</span>
+          {% endif %}
+        </a>
+
+        <div class="nav-dropdown">
+          <a href="#" class="nav-dropdown-trigger" onclick="return false;">
+            {% if user.avatar %}
+              <img src="{{ user.avatar.url }}" alt="" class="nav-avatar">
+            {% else %}
+              <div class="nav-avatar" style="background:var(--navy-700);display:flex;align-items:center;justify-content:center;color:white;font-size:.8rem;font-weight:700;">
+                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+              </div>
+            {% endif %}
+            <span style="font-weight:600;font-size:.88rem;max-width:90px;overflow:hidden;text-overflow:ellipsis;">{{ user.first_name|default:user.username }}</span>
+            <span style="color:var(--text-muted);font-size:.75rem;">▾</span>
+          </a>
+          <div class="nav-dropdown-menu">
+            {% if user.role == 'guide' %}
+              <a href="{% url 'guides:dashboard' %}">📊 Guide Dashboard</a>
+              <a href="{% url 'guides:tour_create' %}">➕ Add Tour</a>
+            {% else %}
+              <a href="{% url 'accounts:dashboard' %}">🗓 My Bookings</a>
+            {% endif %}
+            <a href="{% url 'chat:inbox' %}">💬 Messages{% if unread_messages %} <span style="background:var(--danger);color:white;border-radius:999px;font-size:.65rem;padding:1px 6px;font-weight:700;">{{ unread_messages }}</span>{% endif %}</a>
+            <div class="divider"></div>
+            {% if user.role == 'guide' %}
+              <a href="{% url 'guides:profile_edit' %}">✏ Edit Profile</a>
+            {% else %}
+              <a href="{% url 'accounts:profile_edit' %}">✏ Edit Profile</a>
+            {% endif %}
+            <div class="divider"></div>
+            <a href="{% url 'accounts:logout' %}" style="color:var(--danger);">↩ Logout</a>
+          </div>
+        </div>
+
+      {% else %}
+        <a href="{% url 'guides:register' %}" class="btn btn-outline btn-sm navbar-guide-btn">Become a Guide</a>
+        <a href="{% url 'accounts:login' %}" class="btn btn-ghost btn-sm">Log In</a>
+        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">Sign Up</a>
+      {% endif %}
+
+      <button class="hamburger" aria-label="Open menu" type="button">☰</button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+
+  <!-- Header -->
+  <div class="mobile-menu-header">
+    <a href="{% url 'core:home' %}" class="navbar-brand">Trip<span>AZ</span></a>
+    <button class="mobile-close" aria-label="Close menu" type="button">✕</button>
+  </div>
+
+  <!-- User info (authenticated) -->
+  {% if user.is_authenticated %}
+  <div class="mobile-menu-user">
+    {% if user.avatar %}
+      <img src="{{ user.avatar.url }}" class="mobile-menu-user-avatar" alt="">
+    {% else %}
+      <div class="mobile-menu-user-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+    {% endif %}
+    <div class="mobile-menu-user-info">
+      <div class="mobile-menu-user-name">{{ user.get_full_name|default:user.username }}</div>
+      <div class="mobile-menu-user-role">{{ user.role|default:"Tourist" }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Navigation -->
+  <nav class="mobile-nav">
+    <div class="mobile-nav-section">Explore</div>
+    <a href="{% url 'core:home' %}">🏠 Home</a>
+    <a href="{% url 'guides:catalog' %}">🧭 Find Guides</a>
+    <a href="{% url 'guides:tour_catalog' %}">🗺 Find Tours</a>
+    <a href="{% url 'core:about' %}">ℹ About</a>
+    <a href="{% url 'core:contacts' %}">✉ Contact</a>
+
+    {% if user.is_authenticated %}
+      <div class="mobile-nav-divider"></div>
+      <div class="mobile-nav-section">My Account</div>
+
+      {% if user.role == 'guide' %}
+        <a href="{% url 'guides:dashboard' %}">📊 Guide Dashboard</a>
+        <a href="{% url 'guides:tour_create' %}">➕ Add Tour</a>
+        <a href="{% url 'guides:profile_edit' %}">✏ Edit Profile</a>
+      {% else %}
+        <a href="{% url 'accounts:dashboard' %}">🗓 My Bookings</a>
+        <a href="{% url 'accounts:favorites' %}">❤ Saved Guides</a>
+        <a href="{% url 'accounts:profile_edit' %}">✏ Edit Profile</a>
+        {% if not user.guide_profile %}
+          <a href="{% url 'guides:register' %}">🌟 Become a Guide</a>
+        {% endif %}
+      {% endif %}
+
+      <a href="{% url 'chat:inbox' %}">
+        💬 Messages
+        {% if unread_messages %}<span style="background:var(--danger);color:white;border-radius:999px;font-size:.65rem;padding:1px 7px;font-weight:700;margin-left:auto;">{{ unread_messages }}</span>{% endif %}
+      </a>
+      <a href="{% url 'core:notifications' %}">
+        🔔 Notifications
+        {% if unread_notifications > 0 %}<span style="background:var(--danger);color:white;border-radius:999px;font-size:.65rem;padding:1px 7px;font-weight:700;margin-left:auto;">{{ unread_notifications }}</span>{% endif %}
+      </a>
+
+    {% endif %}
+  </nav>
+
+  <!-- Footer actions -->
+  <div class="mobile-nav-footer">
+    {% if user.is_authenticated %}
+      <a href="{% url 'accounts:logout' %}" class="btn btn-outline" style="color:var(--danger);border-color:var(--danger);text-align:center;">↩ Log Out</a>
+    {% else %}
+      <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="text-align:center;">Sign Up Free</a>
+      <a href="{% url 'accounts:login' %}" class="btn btn-outline" style="text-align:center;">Log In</a>
+      <a href="{% url 'guides:register' %}" class="btn btn-ghost" style="text-align:center;font-size:.88rem;">🌟 Become a Guide</a>
+    {% endif %}
+  </div>
+
+</div>

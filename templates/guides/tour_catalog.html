@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Find Tours — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>Find Tours in Azerbaijan</h1>
+    <p>{{ total }} tour{{ total|pluralize }} from verified local guides</p>
+  </div>
+</div>
+
+<div class="container section-sm">
+  <div class="catalog-layout">
+
+    <!-- Sidebar filters -->
+    <aside class="filter-sidebar reveal">
+      <h3>Filter Tours</h3>
+      <form method="get" id="filter-form">
+
+        <div class="filter-group">
+          <label>Search</label>
+          <input type="text" name="q" value="{{ q }}" placeholder="Tour name, keyword..." class="form-control">
+        </div>
+
+        <div class="filter-group">
+          <label>Category</label>
+          <select name="category" class="form-control" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            {% for val, label in categories %}
+            <option value="{{ val }}" {% if selected_category == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>City / Region</label>
+          <select name="city" class="form-control" onchange="this.form.submit()">
+            <option value="">Any City</option>
+            <option value="baku" {% if selected_city == 'baku' %}selected{% endif %}>Baku</option>
+            <option value="ganja" {% if selected_city == 'ganja' %}selected{% endif %}>Ganja</option>
+            <option value="sheki" {% if selected_city == 'sheki' %}selected{% endif %}>Sheki</option>
+            <option value="lankaran" {% if selected_city == 'lankaran' %}selected{% endif %}>Lankaran</option>
+            <option value="quba" {% if selected_city == 'quba' %}selected{% endif %}>Quba</option>
+            <option value="gabala" {% if selected_city == 'gabala' %}selected{% endif %}>Gabala</option>
+            <option value="nakhchivan" {% if selected_city == 'nakhchivan' %}selected{% endif %}>Nakhchivan</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Max Price (AZN/person)</label>
+          <input type="number" name="max_price" value="{{ max_price }}" placeholder="e.g. 150" min="0" class="form-control">
+        </div>
+
+        <div class="filter-group">
+          <label>Max Duration (hours)</label>
+          <input type="number" name="max_duration" value="{{ max_duration }}" placeholder="e.g. 6" min="1" step="0.5" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%;">Apply Filters</button>
+        <a href="{% url 'guides:tour_catalog' %}" class="btn btn-outline" style="width:100%;margin-top:10px;">Clear All</a>
+      </form>
+    </aside>
+
+    <!-- Tour grid -->
+    <div>
+      <div class="catalog-toolbar reveal">
+        <span style="color:var(--text-muted);font-size:.9rem;">
+          <strong style="color:var(--text);">{{ total }}</strong> tour{{ total|pluralize }} found
+        </span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:.85rem;color:var(--text-muted);">Sort by</span>
+          <select class="form-control" style="width:auto;padding:8px 14px;"
+            onchange="location='?{% if q %}q={{ q }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_city %}city={{ selected_city }}&{% endif %}sort='+this.value">
+            <option value="" {% if not sort %}selected{% endif %}>Featured First</option>
+            <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+            <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+            <option value="duration" {% if sort == 'duration' %}selected{% endif %}>Shortest First</option>
+            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+          </select>
+        </div>
+      </div>
+
+      {% if tours %}
+      <div class="tour-catalog-grid">
+        {% for tour in tours %}
+          {% include 'partials/tour_card.html' with show_guide=True %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state reveal">
+        <div class="icon">🔍</div>
+        <h3>No tours found</h3>
+        <p>Try adjusting your filters or search term.</p>
+        <a href="{% url 'guides:tour_catalog' %}" class="btn btn-primary">Clear Filters</a>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

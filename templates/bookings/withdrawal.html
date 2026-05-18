@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}Request Withdrawal — TripAZ{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container"><h1>💸 Request Withdrawal</h1><p style="color:rgba(255,255,255,.7);">Mock withdrawal system — for demo only</p></div>
+</div>
+<div class="container section-sm" style="max-width:500px;">
+  <div class="mock-badge" style="margin-bottom:20px;">🧪 Mock withdrawal — no real bank transfer occurs</div>
+  <div class="card">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Amount (AZN)</label>
+          {% render_field form.amount class="form-control" min="10" placeholder="Minimum 10 AZN" %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          {% render_field form.method class="form-control" %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account / Wallet Number</label>
+          {% render_field form.account_details class="form-control" %}
+        </div>
+        <div style="display:flex;gap:12px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;">Submit Request</button>
+          <a href="{% url 'guides:dashboard' %}" class="btn btn-outline">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

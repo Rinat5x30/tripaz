@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Find Guides — TripAZ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>Find Your Perfect Guide</h1>
+    <p>{{ total }} verified guide{{ total|pluralize }} ready to show you Azerbaijan</p>
+  </div>
+</div>
+
+<div class="container section-sm">
+  <div class="catalog-layout">
+    <aside class="filter-sidebar reveal">
+      <h3>Filter Guides</h3>
+      <form method="get" id="filter-form">
+        <div class="filter-group">
+          <label>Search</label>
+          <input type="text" name="q" value="{{ form.q.value|default:'' }}" placeholder="Name, keyword..." class="form-control">
+        </div>
+        <div class="filter-group">
+          <label>City / Region</label>
+          <select name="city" class="form-control" onchange="this.form.submit()">
+            <option value="">Any City</option>
+            <option value="baku" {% if form.city.value == 'baku' %}selected{% endif %}>Baku</option>
+            <option value="ganja" {% if form.city.value == 'ganja' %}selected{% endif %}>Ganja</option>
+            <option value="sheki" {% if form.city.value == 'sheki' %}selected{% endif %}>Sheki</option>
+            <option value="lankaran" {% if form.city.value == 'lankaran' %}selected{% endif %}>Lankaran</option>
+            <option value="quba" {% if form.city.value == 'quba' %}selected{% endif %}>Quba</option>
+            <option value="gabala" {% if form.city.value == 'gabala' %}selected{% endif %}>Gabala</option>
+            <option value="nakhchivan" {% if form.city.value == 'nakhchivan' %}selected{% endif %}>Nakhchivan</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Language</label>
+          <select name="language" class="form-control" onchange="this.form.submit()">
+            <option value="">Any Language</option>
+            <option value="english" {% if form.language.value == 'english' %}selected{% endif %}>English</option>
+            <option value="russian" {% if form.language.value == 'russian' %}selected{% endif %}>Russian</option>
+            <option value="azerbaijani" {% if form.language.value == 'azerbaijani' %}selected{% endif %}>Azerbaijani</option>
+            <option value="german" {% if form.language.value == 'german' %}selected{% endif %}>German</option>
+            <option value="french" {% if form.language.value == 'french' %}selected{% endif %}>French</option>
+            <option value="arabic" {% if form.language.value == 'arabic' %}selected{% endif %}>Arabic</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Min Rating</label>
+          <select name="min_rating" class="form-control">
+            <option value="">Any Rating</option>
+            <option value="4.5" {% if form.min_rating.value == '4.5' %}selected{% endif %}>4.5+ ★</option>
+            <option value="4.0" {% if form.min_rating.value == '4.0' %}selected{% endif %}>4.0+ ★</option>
+            <option value="3.5" {% if form.min_rating.value == '3.5' %}selected{% endif %}>3.5+ ★</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Apply Filters</button>
+        <a href="{% url 'guides:catalog' %}" class="btn btn-outline" style="width:100%;margin-top:10px;">Clear All</a>
+      </form>
+    </aside>
+
+    <div>
+      <div class="catalog-toolbar reveal">
+        <span style="color:var(--text-muted);font-size:.9rem;">
+          <strong style="color:var(--text);">{{ total }}</strong> guides found
+        </span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:.85rem;color:var(--text-muted);">Sort by</span>
+          <select onchange="location='?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}sort='+this.value" class="form-control" style="width:auto;padding:8px 14px;">
+            <option value="-is_featured">Featured First</option>
+            <option value="rating">Top Rated</option>
+            <option value="newest">Newest</option>
+          </select>
+        </div>
+      </div>
+
+      {% if guides %}
+      <div class="grid-3">
+        {% for guide in guides %}
+          {% include 'partials/guide_card.html' %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state reveal">
+        <div class="icon">🔍</div>
+        <h3>No guides found</h3>
+        <p>Try adjusting your filters or search term.</p>
+        <a href="{% url 'guides:catalog' %}" class="btn btn-primary">Clear Filters</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Guide: {{ guide.user.get_full_name }} — TripAZ Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="{% url 'core:admin_dashboard' %}">Admin</a> › Verify Guide</div>
+    <h1>Guide Verification</h1>
+  </div>
+</div>
+
+<div class="container section-sm" style="max-width:760px;">
+  <div class="grid-2" style="align-items:start;">
+
+    <!-- Guide Info -->
+    <div class="card">
+      <div class="card-body">
+        <h3 style="margin-bottom:16px;">Applicant Details</h3>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:.9rem;">
+          <div class="flex-between"><span style="color:var(--text-muted);">Full Name</span><span style="font-weight:600;">{{ guide.user.get_full_name }}</span></div>
+          <div class="flex-between"><span style="color:var(--text-muted);">Email</span><span>{{ guide.user.email }}</span></div>
+          <div class="flex-between"><span style="color:var(--text-muted);">Phone</span><span>{{ guide.user.phone|default:"N/A" }}</span></div>
+          <div class="flex-between"><span style="color:var(--text-muted);">City</span><span>{{ guide.get_city_display }}</span></div>
+          <div class="flex-between"><span style="color:var(--text-muted);">Languages</span><span>{{ guide.languages }}</span></div>
+          <div class="flex-between"><span style="color:var(--text-muted);">Experience</span><span>{{ guide.experience_years }} years</span></div>
+          <div class="flex-between"><span style="color:var(--text-muted);">License No.</span><span style="font-family:monospace;">{{ guide.license_number|default:"N/A" }}</span></div>
+
+          <div class="flex-between"><span style="color:var(--text-muted);">Applied</span><span>{{ guide.created_at|date:"M d, Y H:i" }}</span></div>
+        </div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+          <div style="font-weight:600;margin-bottom:8px;">Bio:</div>
+          <p style="font-size:.88rem;color:var(--text);">{{ guide.bio }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents & Actions -->
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-body">
+          <h3 style="margin-bottom:16px;">Documents</h3>
+          {% for doc in guide.documents.all %}
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:8px;">
+            <div>
+              <div style="font-weight:600;font-size:.88rem;">{{ doc.get_doc_type_display }}</div>
+              <div style="font-size:.78rem;color:var(--text-muted);">{{ doc.uploaded_at|date:"M d, Y" }}</div>
+            </div>
+            <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm btn-outline">View →</a>
+          </div>
+          {% empty %}
+          <p style="color:var(--text-muted);font-size:.88rem;">No documents uploaded.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h3 style="margin-bottom:16px;">Decision</h3>
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+              <label class="form-label">Message to Applicant (optional)</label>
+              <textarea name="reason" class="form-control" rows="3" placeholder="Add a note for the applicant..."></textarea>
+            </div>
+
+            <div style="display:flex;gap:10px;">
+              <button type="submit" name="action" value="approve" class="btn btn-success btn-lg" style="flex:1;">
+                ✓ Approve Guide
+              </button>
+              <button type="submit" name="action" value="reject" class="btn btn-danger btn-lg" style="flex:1;" onclick="return confirm('Reject this application?')">
+                ✗ Reject
+              </button>
+            </div>
+          </form>
+
+          <div style="margin-top:12px;">
+            <a href="{% url 'core:admin_dashboard' %}" class="btn btn-outline" style="width:100%;">← Back to Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

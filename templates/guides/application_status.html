@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Status — TripAZ{% endblock %}
+
+{% block content %}
+<div class="container section-sm" style="max-width:560px;">
+  <div class="card" style="text-align:center;">
+    <div class="card-body" style="padding:48px 32px;">
+
+      {% if guide.verification_status == 'pending' %}
+        <div style="font-size:3rem;margin-bottom:16px;">⏳</div>
+        <h2 style="margin-bottom:12px;">Application Under Review</h2>
+        <p style="margin-bottom:24px;">Your guide application has been submitted and is being reviewed by our team. This usually takes up to 24 hours.</p>
+        <div style="background:#fefce8;border:1px solid #fde047;border-radius:var(--radius-sm);padding:14px;margin-bottom:28px;font-size:.88rem;text-align:left;">
+          <strong>What's next?</strong><br>
+          You'll receive a notification once your application is reviewed. Until then, you cannot create tours or accept bookings.
+        </div>
+
+      {% elif guide.verification_status == 'rejected' %}
+        <div style="font-size:3rem;margin-bottom:16px;">❌</div>
+        <h2 style="margin-bottom:12px;color:var(--danger);">Application Not Approved</h2>
+        <p style="margin-bottom:16px;">Unfortunately, your guide application was not approved.</p>
+        {% if guide.rejection_reason %}
+          <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:var(--radius-sm);padding:14px;margin-bottom:28px;font-size:.88rem;text-align:left;">
+            <strong>Reason:</strong><br>
+            {{ guide.rejection_reason }}
+          </div>
+        {% endif %}
+        <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:28px;">If you believe this is a mistake, please contact our support team.</p>
+        <a href="{% url 'core:support' %}" class="btn btn-outline">Contact Support</a>
+      {% endif %}
+
+      <a href="{% url 'core:home' %}" class="btn btn-primary" style="{% if guide.verification_status == 'rejected' %}margin-left:12px;{% endif %}">Back to Home</a>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -2,10 +2,14 @@
 
 > A full-featured marketplace connecting foreign tourists with licensed local guides across Azerbaijan.
 
+<div align="center">
+
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![Django](https://img.shields.io/badge/Django-5.0-092E20?logo=django&logoColor=white)
 ![SQLite](https://img.shields.io/badge/Database-SQLite-003B57?logo=sqlite&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-gold)
+
+</div>
 
 ---
 
